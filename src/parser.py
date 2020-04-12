@@ -6,7 +6,7 @@ import sys
 # Lexer
 # -----------------------------------
 class ChessLexer(Lexer):
-	tokens = { JUGADA_NRO, GAME_INFO, SPACE, PIECE, RANK, FILE, CASTLE1, CASTLE2, CHECK, TAKE, RESULT, PROMOTION }
+	tokens = { JUGADA_NRO, GAME_INFO, SPACE, PIECE, RANK, FILE, CASTLE_SHORT, CASTLE_LONG, CHECK, TAKE, RESULT, PROMOTION }
 
 	
 	RESULT = r'[012/]+-[012/]+'
@@ -15,8 +15,8 @@ class ChessLexer(Lexer):
 	PIECE = r'[QKNRB]'
 	FILE = r'[abcdefgh]'
 	RANK= r'[12345678]'
-	CASTLE1 = r'O-O'
-	CASTLE2 = r'O-O-O'
+	CASTLE_SHORT = r'O-O'
+	CASTLE_LONG = r'O-O-O'
 	CHECK = r'\+'
 	TAKE = r'x'
 	PROMOTION = r'='
@@ -49,17 +49,89 @@ class ChessParser(Parser):
 		...
 
 	@_('')
-	def empty(self,p):
+	def empty(self, p):
 		pass
 
 	@_('SPACE', 'empty')
-	def whatever(self,p):
+	def __(self, p):
 		...
+	
+	@_('PIECE', 'empty')
+	def who(self, p):
+		try:
+			return ( p.PIECE)
+		except:
+			return ('pawn')
+	
+	@_(		'FILE RANK', 
+			'TAKE FILE RANK',
+			'FILE FILE RANK',
+			'FILE TAKE FILE RANK',
+			'RANK FILE RANK',
+			'RANK TAKE FILE RANK',
+			'FILE RANK FILE RANK',
+			'FILE RANK TAKE FILE RANK'
+		)
+	def where(self, p):
+		extra = ""
+		try:
+			to = p.FILE
+		except:
+			to = ""
+		try:
+			to += p.RANK
+		except:
+			...
+		disamb = ""
 
-	@_('JUGADA_NRO SPACE PIECE FILE RANK SPACE PIECE FILE RANK whatever')
+		if hasattr(p, 'TAKE'):
+			extra = 'TAKE'
+		if hasattr(p, 'FILE0'):
+			disamb = p.FILE0
+			to = p.FILE1
+		if hasattr(p, 'RANK0'):
+			disamb += p.RANK0
+			to += p.RANK1
+
+		if disamb != "":
+			return ('to '+extra, disamb, to)
+
+		return ('to' + extra, to)
+
+		
+
+	@_('who where', 'castle')
+	def move(self, p):
+		try:
+			return ( p.who, p.where)
+		except:
+			return ('castle', p[0])
+
+	@_('TAKE', 'empty')
+	def take(self, p):
+		return p[0]
+
+	@_('CASTLE_SHORT', 'CASTLE_LONG')
+	def castle(self, p):
+		try:
+			return p.CASTLE_SHORT
+		except:
+			return p.CASTLE_LONG
+
+	@_('CHECK', 'empty')
+	def modif(self, p):
+		try:
+			if p.CHECK:
+				return 'CHECK'
+		except:
+			return ''
+
+	@_('JUGADA_NRO __ move modif __ move modif __')
 	def movement(self, p):
-		return ('movement', p.JUGADA_NRO, p.PIECE0, p.FILE0, p.RANK0, p.PIECE1, p.FILE1, p.RANK1)
-
+		return (
+				(p.JUGADA_NRO, 'white', p.move0, p.modif0),
+				(p.JUGADA_NRO, 'black', p.move1, p.modif1)
+				)
 
 # -----------------------------------
 # Usage
