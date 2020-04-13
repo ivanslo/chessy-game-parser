@@ -6,7 +6,7 @@ import sys
 # Lexer
 # -----------------------------------
 class ChessLexer(Lexer):
-	tokens = { JUGADA_NRO, GAME_INFO, SPACE, PIECE, RANK, FILE, CASTLE_SHORT, CASTLE_LONG, CHECK, TAKE, RESULT, PROMOTION }
+	tokens = { JUGADA_NRO, GAME_INFO, SPACE, PIECE, RANK, FILE, CASTLE_SHORT, CASTLE_LONG, CHECK, TAKE, RESULT, PROMOTION, NEWLINE }
 
 	
 	RESULT = r'[012/]+-[012/]+'
@@ -21,9 +21,18 @@ class ChessLexer(Lexer):
 	TAKE = r'x'
 	PROMOTION = r'='
 	SPACE = r' '
+	NEWLINE = r'\n'
 
-	ignore_newline = r'\n'
-
+	# parse int
+	def JUGADA_NRO(self, t):
+		t.value = int(t.value[:-1])
+		return t
+	
+	# remove newline
+	def GAME_INFO(self, t):
+		t.value = t.value[:-1]
+		return t
+	
 	def error(self, t):
 		print("Illegal character '%s'" % t.value[0])
 		self.index += 1
@@ -31,28 +40,47 @@ class ChessLexer(Lexer):
 # -----------------------------------
 # Parser
 # -----------------------------------
+
+
 class ChessParser(Parser):
 	tokens = ChessLexer.tokens
-	debugfile = 'parser.out'
+	# debugfile = 'parser.out'
 
-
-	@_('movements')
+	@_('info movements RESULT __')
 	def game(self, p):
+		# for el in p.info:
+		# 	print(el)
+		for el in p.movements:
+			print(el)
+		# print(p.RESULT)
 		...
 	
+	@_('info __ GAME_INFO __', 'empty')
+	def info(self, p):
+		try:
+			return p.info + [p.GAME_INFO]
+		except:
+			return ()
+
+	@_('GAME_INFO')
+	def info(self, p):
+		return [p.GAME_INFO]
+
 	@_('movements movement')
 	def movements(self, p):
-		print( p[1] )
+		print(p.movement)
+		return p.movements + [ p.movement ]
 
-	@_('empty')
+	@_('movement')
 	def movements(self, p):
-		...
+		# print(p.movement)
+		return [ p.movement ]
 
 	@_('')
 	def empty(self, p):
 		pass
 
-	@_('SPACE', 'empty')
+	@_('SPACE', 'NEWLINE', 'empty')
 	def __(self, p):
 		...
 	
@@ -100,10 +128,17 @@ class ChessParser(Parser):
 
 		
 
-	@_('who where', 'castle')
+	@_('PROMOTION PIECE', 'empty')
+	def promotion(self, p):
+		try:
+			return ('promoted to', p.PIECE)
+		except:
+			return None
+
+	@_('who where promotion', 'castle')
 	def move(self, p):
 		try:
-			return ( p.who, p.where)
+			return ( p.who, p.where, p.promotion)
 		except:
 			return ('castle', p[0])
 
@@ -126,12 +161,16 @@ class ChessParser(Parser):
 		except:
 			return ''
 
-	@_('JUGADA_NRO __ move modif __ move modif __')
+	@_('JUGADA_NRO __ move modif __ move modif __',
+	   'JUGADA_NRO __ move modif __')
 	def movement(self, p):
-		return (
-				(p.JUGADA_NRO, 'white', p.move0, p.modif0),
-				(p.JUGADA_NRO, 'black', p.move1, p.modif1)
-				)
+		try:
+			return (
+					(p.JUGADA_NRO, 'white', p.move0, p.modif0),
+					(p.JUGADA_NRO, 'black', p.move1, p.modif1)
+					)
+		except:
+			return ((p.JUGADA_NRO, 'white', p.move, p.modif))
 
 # -----------------------------------
 # Usage
