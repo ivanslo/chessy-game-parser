@@ -15,8 +15,8 @@ class ChessLexer(Lexer):
 	PIECE = r'[QKNRB]'
 	FILE = r'[abcdefgh]'
 	RANK= r'[12345678]'
-	CASTLE_SHORT = r'O-O'
 	CASTLE_LONG = r'O-O-O'
+	CASTLE_SHORT = r'O-O'
 	CHECK = r'\+'
 	TAKE = r'x'
 	PROMOTION = r'='
@@ -48,12 +48,7 @@ class ChessParser(Parser):
 
 	@_('info movements RESULT __')
 	def game(self, p):
-		# for el in p.info:
-		# 	print(el)
-		for el in p.movements:
-			print(el)
-		# print(p.RESULT)
-		...
+		return p
 	
 	@_('info __ GAME_INFO __', 'empty')
 	def info(self, p):
@@ -68,12 +63,11 @@ class ChessParser(Parser):
 
 	@_('movements movement')
 	def movements(self, p):
-		print(p.movement)
+		# print(p.movement)
 		return p.movements + [ p.movement ]
 
 	@_('movement')
 	def movements(self, p):
-		# print(p.movement)
 		return [ p.movement ]
 
 	@_('')
@@ -135,42 +129,44 @@ class ChessParser(Parser):
 		except:
 			return None
 
-	@_('who where promotion', 'castle')
+	@_('who where promotion')
 	def move(self, p):
-		try:
-			return ( p.who, p.where, p.promotion)
-		except:
-			return ('castle', p[0])
+		return ( p.who, p.where, p.promotion)
+	
+	@_('castle')
+	def move(self, p):
+		return ('castle', p.castle)
 
 	@_('TAKE', 'empty')
 	def take(self, p):
 		return p[0]
 
-	@_('CASTLE_SHORT', 'CASTLE_LONG')
+	@_('CASTLE_SHORT')
 	def castle(self, p):
-		try:
-			return p.CASTLE_SHORT
-		except:
-			return p.CASTLE_LONG
+		return p.CASTLE_SHORT
 
-	@_('CHECK', 'empty')
+	@_('CASTLE_LONG')
+	def castle(self, p):
+		return p.CASTLE_LONG
+
+	@_('CHECK')
 	def modif(self, p):
-		try:
-			if p.CHECK:
-				return 'CHECK'
-		except:
-			return ''
+		return p.CHECK
 
-	@_('JUGADA_NRO __ move modif __ move modif __',
-	   'JUGADA_NRO __ move modif __')
+	@_('empty')
+	def modif(self, p):
+		return ''
+
+	@_('JUGADA_NRO __ move modif __ move modif __')
 	def movement(self, p):
-		try:
-			return (
-					(p.JUGADA_NRO, 'white', p.move0, p.modif0),
-					(p.JUGADA_NRO, 'black', p.move1, p.modif1)
-					)
-		except:
-			return ((p.JUGADA_NRO, 'white', p.move, p.modif))
+		return (
+				(p.JUGADA_NRO, 'white', p.move0, p.modif0),
+				(p.JUGADA_NRO, 'black', p.move1, p.modif1)
+				)
+
+	@_('JUGADA_NRO __ move modif __')
+	def movement(self, p):
+		return (p.JUGADA_NRO, 'white', p.move, p.modif)
 
 # -----------------------------------
 # Usage
@@ -179,4 +175,5 @@ class ChessParser(Parser):
 if __name__ == "__main__":
 	lexer = ChessLexer()
 	parser = ChessParser()
-	parser.parse(lexer.tokenize(sys.stdin.read()))
+	cosas = parser.parse(lexer.tokenize(sys.stdin.read()))
+	# print(cosas)
