@@ -6,7 +6,9 @@ import sys
 # Lexer
 # -----------------------------------
 class ChessLexer(Lexer):
-	tokens = { JUGADA_NRO, GAME_INFO, SPACE, PIECE, RANK, FILE, CASTLE_SHORT, CASTLE_LONG, CHECK, TAKE, RESULT, PROMOTION, NEWLINE }
+	tokens = { JUGADA_NRO, GAME_INFO, SPACE, PIECE, 
+			RANK, FILE, CASTLE_SHORT, CASTLE_LONG, 
+			CHECK, TAKE, RESULT, PROMOTION, NEWLINE }
 
 	
 	RESULT = r'[012/]+-[012/]+'
@@ -34,8 +36,7 @@ class ChessLexer(Lexer):
 		return t
 	
 	def error(self, t):
-		print("Illegal character '%s'" % t.value[0])
-		self.index += 1
+		raise Exception("Illegal token '%s'" % t.value[0])
 
 # -----------------------------------
 # Parser
@@ -168,6 +169,9 @@ class ChessParser(Parser):
 	def movement(self, p):
 		return (p.JUGADA_NRO, 'white', p.move, p.modif)
 
+	def error(self, p):
+		if p != None:
+			raise Exception('Parse Error: "%s"' % p)
 # -----------------------------------
 # Usage
 # -----------------------------------
