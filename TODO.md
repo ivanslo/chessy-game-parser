@@ -1,9 +1,4 @@
-DONE * Unit Tests (no tener errores)
-* clearer parsing syntax (pasar los try/except a diff reglas)
-	* add tests as i go
-
-* store the movements in a struct
-* compute the movements with the board
+* compute the movements in a board - with N position
 
 Tips:
 - unalias python
@@ -13,3 +8,12 @@ Resources in Browser:
 - youtube talk: https://www.youtube.com/watch?v=zJ9z6Ge-vXs
 
 
+Interpreter Commands: (test on the flight)
+``` 
+from src import parser
+
+lexer = parser.ChessLexer()
+pr = parser.ChessParser()
+
+pr.parse(lexer.tokenize(" "))
+```

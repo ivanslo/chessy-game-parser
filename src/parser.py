@@ -46,17 +46,27 @@ class ChessLexer(Lexer):
 class ChessParser(Parser):
 	tokens = ChessLexer.tokens
 	# debugfile = 'parser.out'
+	start = 'game'
 
-	@_('info movements RESULT __')
+	@_('info __ movements result __')
 	def game(self, p):
 		return p
 	
-	@_('info __ GAME_INFO __', 'empty')
+	@_('RESULT')
+	def result(self, p):
+		return p.RESULT
+
+	@_('empty')
+	def result(self, p):
+		return "<no-result>"
+
+	@_('empty')
 	def info(self, p):
-		try:
-			return p.info + [p.GAME_INFO]
-		except:
-			return ()
+		return ()
+
+	@_('info __ GAME_INFO __')
+	def info(self, p):
+		return p.info + [p.GAME_INFO]
 
 	@_('GAME_INFO')
 	def info(self, p):
@@ -64,7 +74,6 @@ class ChessParser(Parser):
 
 	@_('movements movement')
 	def movements(self, p):
-		# print(p.movement)
 		return p.movements + [ p.movement ]
 
 	@_('movement')
@@ -79,56 +88,51 @@ class ChessParser(Parser):
 	def __(self, p):
 		...
 	
-	@_('PIECE', 'empty')
+	@_('PIECE')
 	def who(self, p):
-		try:
-			return ( p.PIECE)
-		except:
-			return ('pawn')
+		return (p.PIECE)
+
+	@_('empty')
+	def who(self, p):
+		return ('pawn')
 	
-	@_(		'FILE RANK', 
-			'TAKE FILE RANK',
-			'FILE FILE RANK',
-			'FILE TAKE FILE RANK',
-			'RANK FILE RANK',
-			'RANK TAKE FILE RANK',
-			'FILE RANK FILE RANK',
-			'FILE RANK TAKE FILE RANK'
-		)
+	@_(		
+		'FILE RANK',		# not taking
+		'FILE FILE RANK',
+		'RANK FILE RANK',
+		'FILE RANK FILE RANK',
+		'TAKE FILE RANK',	# taking
+		'FILE TAKE FILE RANK',
+		'RANK TAKE FILE RANK',
+		'FILE RANK TAKE FILE RANK'
+	)
 	def where(self, p):
-		extra = ""
-		try:
-			to = p.FILE
-		except:
-			to = ""
-		try:
+		to = ""
+		dis= ""
+		if hasattr(p, 'FILE1'):
+			to += p.FILE1
+			dis += p.FILE0
+		else:
+			to += p.FILE
+
+		if hasattr(p, 'RANK1'):
+			to += p.RANK1
+			dis += p.RANK0
+		else:
 			to += p.RANK
-		except:
-			...
-		disamb = ""
 
 		if hasattr(p, 'TAKE'):
-			extra = 'TAKE'
-		if hasattr(p, 'FILE0'):
-			disamb = p.FILE0
-			to = p.FILE1
-		if hasattr(p, 'RANK0'):
-			disamb += p.RANK0
-			to += p.RANK1
+			return ('to (taking)', dis, to)
 
-		if disamb != "":
-			return ('to '+extra, disamb, to)
+		return ('to ', dis, to)
 
-		return ('to' + extra, to)
-
-		
-
-	@_('PROMOTION PIECE', 'empty')
+	@_( 'empty')
 	def promotion(self, p):
-		try:
-			return ('promoted to', p.PIECE)
-		except:
-			return None
+		...
+
+	@_('PROMOTION PIECE')
+	def promotion(self, p):
+		return ('promoted to', p.PIECE)
 
 	@_('who where promotion')
 	def move(self, p):

@@ -48,17 +48,44 @@ class TestParser:
 		self.parser = parser.ChessParser()
 		self.lexer = parser.ChessLexer()
 	
+	def parse(self,text):
+		return self.parser.parse(self.lexer.tokenize(text))
+
 	def test_basic_game(self):
-		_ = self.parser.parse(self.lexer.tokenize("1. e3 e4 2.Ke3 exd5"))
+		_ = self.parse("1. e3 e4 2.Ke3 exd5")
 
 	def test_castle(self):
-		_ = self.parser.parse(self.lexer.tokenize("23. O-O-O O-O"))
+		_ = self.parse("23. O-O-O O-O")
 
 	def test_promote(self):
-		_ = self.parser.parse(self.lexer.tokenize("23. e8=Q"))
+		_ = self.parse("23. e8=Q e1 24. a8=N R3")
 
 	def test_check(self):
-		_ = self.parser.parse(self.lexer.tokenize("23. Ra3+ Be3+"))
+		_ = self.parse("23. Ra3+ Be3+")
 
-	def test_disamb(self):
-		_ = self.parser.parse(self.lexer.tokenize("2. R2a3 Beh3 3.Ba2c3 Rh8"))
+	def test_disamb_move(self):
+		non_eat = self.parse("1. Ra3 Beh3 3.B2c3 Re4h8 ")
+		eating  = self.parse("1. Rxa3 Bexh3 3.B2xc3 Re4xh8") 
+
+	def test_gameinfo(self):
+		result = self.parse("[Day 3]\n [Result 1-0]\n1. e4 ")
+		print(result)
+		assert( result != None )
+
+	def test_result(self):
+		result = self.parse("1. e4 1-0")
+		assert( result != None )
+
+	def test_no_result(self):
+		result = self.parse("1. e4")
+		assert( result != None )
+		
+	def test_gameinfo_2(self):
+		result = self.parse("[Day 3]\n 1. e4 ")
+		print(result)
+		assert( result != None )
+
+	def test_gameinfo_3(self):
+		result = self.parse("1. e4 ")
+		print(result)
+		assert( result != None )
