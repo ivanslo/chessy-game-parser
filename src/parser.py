@@ -1,6 +1,8 @@
 from sly import Lexer, Parser
 import sys
 
+import Movement
+
 
 # -----------------------------------
 # Lexer
@@ -44,9 +46,19 @@ class ChessLexer(Lexer):
 
 
 class ChessParser(Parser):
+	callbackFunction = None
 	tokens = ChessLexer.tokens
 	# debugfile = 'parser.out'
+	
 	start = 'game'
+
+	currentMove = Movement.Movement()
+	def newMovement(self):
+		self.currentMove = Movement.Movement()
+
+	def setCallbackFunction(self, cb):
+		self.callbackFunction = cb
+
 
 	@_('info __ movements result __')
 	def game(self, p):
@@ -90,11 +102,11 @@ class ChessParser(Parser):
 	
 	@_('PIECE')
 	def who(self, p):
-		return (p.PIECE)
+		self.currentMove.piece = p.PIECE
 
 	@_('empty')
 	def who(self, p):
-		return ('pawn')
+		self.currentMove.piece = 'p'
 	
 	@_(		
 		'FILE RANK',		# not taking
@@ -107,24 +119,21 @@ class ChessParser(Parser):
 		'FILE RANK TAKE FILE RANK'
 	)
 	def where(self, p):
-		to = ""
-		dis= ""
 		if hasattr(p, 'FILE1'):
-			to += p.FILE1
-			dis += p.FILE0
+			self.currentMove.destFile = p.FILE1
+			self.currentMove.disFile = p.FILE0
 		else:
-			to += p.FILE
+			self.currentMove.destFile = p.FILE
 
 		if hasattr(p, 'RANK1'):
-			to += p.RANK1
-			dis += p.RANK0
+			self.currentMove.destRank = p.RANK1
+			self.currentMove.disRank = p.RANK0
 		else:
-			to += p.RANK
+			self.currentMove.destRank = p.RANK
 
 		if hasattr(p, 'TAKE'):
-			return ('to (taking)', dis, to)
-
-		return ('to ', dis, to)
+			self.currentMove.take = True
+		return ()
 
 	@_( 'empty')
 	def promotion(self, p):
@@ -132,46 +141,65 @@ class ChessParser(Parser):
 
 	@_('PROMOTION PIECE')
 	def promotion(self, p):
-		return ('promoted to', p.PIECE)
+		self.currentMove.crown = True
+		self.currentMove.crownTo = p.PIECE
 
 	@_('who where promotion')
 	def move(self, p):
-		return ( p.who, p.where, p.promotion)
+		...
+		#return ( p.who, p.where, p.promotion)
 	
 	@_('castle')
 	def move(self, p):
-		return ('castle', p.castle)
+		...
 
 	@_('TAKE', 'empty')
 	def take(self, p):
-		return p[0]
+		self.currentMove.take = True
 
 	@_('CASTLE_SHORT')
 	def castle(self, p):
-		return p.CASTLE_SHORT
+		self.currentMove.piece = 'K'
+		self.currentMove.castleShort = True
 
 	@_('CASTLE_LONG')
 	def castle(self, p):
-		return p.CASTLE_LONG
+		self.currentMove.piece = 'K'
+		self.currentMove.castleLong = True
 
 	@_('CHECK')
 	def modif(self, p):
-		return p.CHECK
+		self.currentMove.check = True
 
 	@_('empty')
 	def modif(self, p):
 		return ''
 
-	@_('JUGADA_NRO __ move modif __ move modif __')
+	@_('JUGADA_NRO __ whiteMovement __ blackMovement __')
 	def movement(self, p):
-		return (
-				(p.JUGADA_NRO, 'white', p.move0, p.modif0),
-				(p.JUGADA_NRO, 'black', p.move1, p.modif1)
-				)
+		...
 
-	@_('JUGADA_NRO __ move modif __')
+
+	@_('JUGADA_NRO __ whiteMovement __')
 	def movement(self, p):
-		return (p.JUGADA_NRO, 'white', p.move, p.modif)
+		...
+
+	@_('move modif')
+	def whiteMovement(self, p):
+		self.currentMove.color = 'W'
+		if self.callbackFunction:
+			self.callbackFunction(self.currentMove)
+			self.newMovement()
+			
+		# return (p.move, p.modif)
+
+	@_('move modif')
+	def blackMovement(self, p):
+		self.currentMove.color = 'B'
+		if self.callbackFunction:
+			self.callbackFunction(self.currentMove)
+			self.newMovement()
+		# return (p.move, p.modif)
 
 	def error(self, p):
 		if p != None:
@@ -184,4 +212,4 @@ if __name__ == "__main__":
 	lexer = ChessLexer()
 	parser = ChessParser()
 	cosas = parser.parse(lexer.tokenize(sys.stdin.read()))
-	# print(cosas)
+	print(cosas)

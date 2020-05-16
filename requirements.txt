@@ -1,2 +1,3 @@
 sly
-py.test
+pytest
+pytest_mock
