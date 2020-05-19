@@ -37,5 +37,12 @@ def main():
 	# normal Knight
 	# parser.parse(lexer.tokenize("1. Nf3 Nh6"))
 	# ambiguous Knight
-	parser.parse(lexer.tokenize("1. Nf3 Nf6 2. Nc3 Nc6 3. Nd4 Nd5 5. Ncb5 Ndb4 6. Nxc6 dxc6 7. Nd4"))
+	# parser.parse(lexer.tokenize("1. Nf3 Nf6 2. Nc3 Nc6 3. Nd4 Nd5 5. Ncb5 Ndb4 6. Nxc6 dxc6 7. Nd4"))
+
+	# normal Rook
+	# ambiguous Rook
+	# parser.parse(lexer.tokenize("1. a4 a5 2. Ra3 Ra6 3. Re3"))
+	# parser.parse(lexer.tokenize("1. a4 a5 2. Ra3 Ra6 3. h4 h5 4. Rhh3 Rhh6 5. Rhe3"))
+
+
 main()

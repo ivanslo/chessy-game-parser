@@ -103,6 +103,37 @@ class Board:
 			board[rank][file] = piece
 			return
 		raise Exception('not possible to move bishop like that {0}'.format(movement))
+	
+	def moveRook(self, movement: Movement, board: [[str]]):
+		file = toFile(movement.destFile)
+		rank = toRank(movement.destRank)
+		piece = movement.color + movement.piece
+
+		# where is it moved from?
+		possibleRooks = []
+
+		for delta in [(0,1), (0,-1), (-1,0), (1, 0)]:
+			whereFrom = self.findPieceWithDelta(board, piece, rank, file, delta[0], delta[1])
+			if whereFrom:
+				possibleRooks.append(whereFrom)
+
+
+		# TODO: do the same with the Knights!!!!
+		if len(possibleRooks) > 1:
+			if movement.disRank:
+				dr = toRank(movement.disRank)
+				possibleRooks = list(filter(lambda x : x['rank'] == dr, possibleRooks ))
+			if movement.disFile:
+				df = toFile(movement.disFile)
+				possibleRooks = list(filter(lambda x : x['file'] == df, possibleRooks ))
+		
+		if len(possibleRooks) == 1:
+			rook = possibleRooks[0]
+			board[rook['rank']][rook['file']] = ' '
+		else:
+			raise Exception('Not possible to move the Rook {0}'.format(movement))
+
+		board[rank][file] = piece
 
 	def moveKnight(self, movement: Movement, board: [[str]]):
 		# TODO: write a 'getFRP' that return the three
@@ -124,42 +155,21 @@ class Board:
 			testRank = rank+varR[i]
 			testFile = file+varF[i]
 			if inBoard(testRank, testFile) and board[testRank][testFile] == piece:
-				possibleKnights.append( (testRank, testFile) )
+				possibleKnights.append( { 'rank':testRank, 'file':testFile} )
+
+		if len(possibleKnights) > 1 :
+			knight = None
+			if movement.disFile:
+				df = toFile(movement.disFile)
+				possibleKnights = list(filter(lambda x : x['file'] == df, possibleKnights))
+			if movement.disRank:
+				dr = toRank(movement.disRank)
+				possibleKnights = list(filter(lambda x : x['rank'] == dr, possibleKnights))
 
 		if len(possibleKnights) == 1:
 			knight = possibleKnights[0]
-			board[knight[0]][knight[1]] = ' '
-
-
-		if len(possibleKnights) == 2:
-			# disambiguate
-			knight = None
-			if movement.disFile and not movement.disRank:
-				disF = toFile(movement.disFile)
-				if possibleKnights[0][1] == disF:
-					knight = possibleKnights[0]
-				if possibleKnights[1][1] == disF:
-					knight = possibleKnights[1]
-			if movement.disRank and not movement.disFile:
-				disR = toRank(movement.disRank)
-				if possibleKnights[0][0] == disR:
-					knight = possibleKnights[0]
-				if possibleKnights[1][0] == disR:
-					knight = possibleKnights[1]
-
-			if movement.disRank and movement.disFile:
-				disR = toRank(movement.disRank)
-				disF = toFile(movement.disFile)
-				if possibleKnights[0][0] == disR and possibleKnights[0][1] == disF:
-					knight = possibleKnights[0]
-				if possibleKnights[1][0] == disR and possibleKnights[1][1] == disF:
-					knight = possibleKnights[1]
-
-			if knight == None:
-				raise Exception('Not possible to disambiguate he Knight {0}'.format(movement))
-			board[knight[0]][knight[1]] = ' '
-
-		if len(possibleKnights) == 0 or len(possibleKnights) > 2:
+			board[knight['rank']][knight['file']] = ' '
+		else:
 			raise Exception('Not possible to move the Knight {0}'.format(movement))
 	
 		board[rank][file] = piece
@@ -189,6 +199,10 @@ class Board:
 
 		if movement.piece == 'N':
 			self.moveKnight(movement, newBoard)
+		
+		if movement.piece == 'R':
+			self.moveRook(movement, newBoard)
+
 		self.boards.append(newBoard)
 		
 	
