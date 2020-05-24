@@ -10,7 +10,6 @@ def printSomething(aa):
 	__board.makeMovement(aa)
 	__board.printBoard()
 	
-	
 def main():
 	print("----------------------")
 
@@ -44,5 +43,10 @@ def main():
 	# parser.parse(lexer.tokenize("1. a4 a5 2. Ra3 Ra6 3. Re3"))
 	# parser.parse(lexer.tokenize("1. a4 a5 2. Ra3 Ra6 3. h4 h5 4. Rhh3 Rhh6 5. Rhe3"))
 
+	# normal Queen
+	# parser.parse(lexer.tokenize("1. d4 e5 2. Qd3 Qh4 3. Qb5 Qxd4"))
+	
+	# normal King
+	# parser.parse(lexer.tokenize("1. e4 d5 2. Ke2 Kd7 3. Kd3 Kc6"))
 
 main()

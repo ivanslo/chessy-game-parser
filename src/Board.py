@@ -31,25 +31,38 @@ def toRank(rank: str)-> int:
 
 
 class Board:
+	'''
+	uppercase is White
+	lowercase is Black
+	'''
 	IdentityBoard: [[str]] = [ 
-			['WR', 'WN', 'WB', 'WQ', 'WK', 'WB', 'WN', 'WR'],
-			['Wp', 'Wp', 'Wp', 'Wp', 'Wp', 'Wp', 'Wp', 'Wp'],
-			[ ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' '],
-			[ ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' '],
-			[ ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' '],
-			[ ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' '],
-			['Bp', 'Bp', 'Bp', 'Bp', 'Bp', 'Bp', 'Bp', 'Bp'],
-			['BR', 'BN', 'BB', 'BQ', 'BK', 'BB', 'BN', 'BR']
+			['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
+			['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+			['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']
 	]
 
 	def __init__(self):
 		self.boards = [ self.IdentityBoard ] 
 
+	def getFRP(self, movement):
+		piece = movement.piece
+		if movement.color == 'W':
+			piece = piece.upper()
+		if movement.color == 'B':
+			piece = piece.lower()
 
-	def movePawn(self, movement: Movement, board: [[str]]):
 		file = toFile(movement.destFile)
 		rank = toRank(movement.destRank)
-		piece = movement.color + movement.piece
+
+		return file, rank, piece
+
+	def movePawn(self, movement: Movement, board: [[str]]):
+		file, rank, piece = self.getFRP(movement)
 
 		side = 1
 		if movement.color == 'B':
@@ -76,28 +89,26 @@ class Board:
 		board[rank][file] = piece
 
 	def moveBishop(self, movement: Movement, board: [[str]]):
-		file = toFile(movement.destFile)
-		rank = toRank(movement.destRank)
-		piece = movement.color + movement.piece
+		file, rank, piece = self.getFRP(movement)
 
-		# where is it moved from?
-		whereFrom = self.findPieceWithDelta(board, piece, rank, file, -1, -1)
+		# TODO: do as rooks,... actually I might need to disambiguate
+		whereFrom = self.findPieceWithDelta(board, piece, rank, file, -1, -1, repeat=True)
 		if whereFrom:
 			board[whereFrom['rank']][whereFrom['file']] = ' '
 			board[rank][file] = piece
 			return
 
-		whereFrom = self.findPieceWithDelta(board, piece, rank, file, -1, 1)
+		whereFrom = self.findPieceWithDelta(board, piece, rank, file, -1, 1, repeat=True)
 		if whereFrom:
 			board[whereFrom['rank']][whereFrom['file']] = ' '
 			board[rank][file] = piece
 			return
-		whereFrom = self.findPieceWithDelta(board, piece, rank, file, 1, -1)
+		whereFrom = self.findPieceWithDelta(board, piece, rank, file, 1, -1, repeat=True)
 		if whereFrom:
 			board[whereFrom['rank']][whereFrom['file']] = ' '
 			board[rank][file] = piece
 			return
-		whereFrom = self.findPieceWithDelta(board, piece, rank, file, 1, 1)
+		whereFrom = self.findPieceWithDelta(board, piece, rank, file, 1, 1, repeat=True)
 		if whereFrom:
 			board[whereFrom['rank']][whereFrom['file']] = ' '
 			board[rank][file] = piece
@@ -105,20 +116,16 @@ class Board:
 		raise Exception('not possible to move bishop like that {0}'.format(movement))
 	
 	def moveRook(self, movement: Movement, board: [[str]]):
-		file = toFile(movement.destFile)
-		rank = toRank(movement.destRank)
-		piece = movement.color + movement.piece
+		file, rank, piece = self.getFRP(movement)
 
-		# where is it moved from?
 		possibleRooks = []
 
 		for delta in [(0,1), (0,-1), (-1,0), (1, 0)]:
-			whereFrom = self.findPieceWithDelta(board, piece, rank, file, delta[0], delta[1])
+			whereFrom = self.findPieceWithDelta(board, piece, rank, file, delta[0], delta[1], repeat=True)
 			if whereFrom:
 				possibleRooks.append(whereFrom)
 
 
-		# TODO: do the same with the Knights!!!!
 		if len(possibleRooks) > 1:
 			if movement.disRank:
 				dr = toRank(movement.disRank)
@@ -136,10 +143,7 @@ class Board:
 		board[rank][file] = piece
 
 	def moveKnight(self, movement: Movement, board: [[str]]):
-		# TODO: write a 'getFRP' that return the three
-		file = toFile(movement.destFile)
-		rank = toRank(movement.destRank)
-		piece = movement.color + movement.piece
+		file, rank, piece = self.getFRP(movement)
 
 
 		def inBoard(r: int, f: int)-> bool:
@@ -155,7 +159,7 @@ class Board:
 			testRank = rank+varR[i]
 			testFile = file+varF[i]
 			if inBoard(testRank, testFile) and board[testRank][testFile] == piece:
-				possibleKnights.append( { 'rank':testRank, 'file':testFile} )
+				possibleKnights.append( { 'rank': testRank, 'file': testFile } )
 
 		if len(possibleKnights) > 1 :
 			knight = None
@@ -175,16 +179,95 @@ class Board:
 		board[rank][file] = piece
 
 
-	def findPieceWithDelta(self, board: [[str]], piece: str, rank: int, file: int, deltaRank: int, deltaFile: int): 
-		
-		if board[rank][file] == 'piece':
-			return { 'file': file, 'rank': rank }
+	def moveQueen(self, movement: Movement, board:[[str]]):
+		file, rank, piece = self.getFRP(movement)
 
-		while file >= 0 and rank >= 0 and file < 8 and rank < 8:
-			if board[rank][file] == piece:
-				return { 'file': file, 'rank': rank }
+		possibleQueens = []
+		deltas = [
+			#horizontals
+			( 0, 1),
+			( 0,-1),
+			( 1, 0),
+			(-1, 0),
+			#diagonals
+			( 1, 1),
+			( 1,-1),
+			(-1,-1),
+			(-1, 1)
+		]
+
+		for delta in deltas:
+			whereFrom = self.findPieceWithDelta(board, piece, rank, file, delta[0], delta[1], repeat=True)
+			if whereFrom:
+				possibleQueens.append(whereFrom)
+
+
+		if len(possibleQueens) > 1:
+			if movement.disRank:
+				dr = toRank(movement.disRank)
+				possibleQueens = list(filter(lambda x : x['rank'] == dr, possibleQueens ))
+			if movement.disFile:
+				df = toFile(movement.disFile)
+				possibleQueens = list(filter(lambda x : x['file'] == df, possibleQueens ))
+		
+		if len(possibleQueens) == 1:
+			queen = possibleQueens[0]
+			board[queen['rank']][queen['file']] = ' '
+		else:
+			raise Exception('Not possible to move the Queen {0}'.format(movement))
+
+		board[rank][file] = piece
+
+	def moveKing(self, movement: Movement, board:[[str]]):
+		file, rank, piece = self.getFRP(movement)
+
+		possibleKings = []
+		deltas = [
+			#horizontals
+			( 0, 1),
+			( 0,-1),
+			( 1, 0),
+			(-1, 0),
+			#diagonals
+			( 1, 1),
+			( 1,-1),
+			(-1,-1),
+			(-1, 1)
+		]
+
+		for delta in deltas:
+			whereFrom = self.findPieceWithDelta(board, piece, rank, file, delta[0], delta[1], repeat=False)
+			if whereFrom:
+				possibleKings.append(whereFrom)
+
+
+		if len(possibleKings) == 1:
+			king = possibleKings[0]
+			board[king ['rank']][king['file']] = ' '
+		else:
+			raise Exception('Not possible to move the King {0}'.format(movement))
+
+		board[rank][file] = piece
+
+	def findPieceWithDelta(self, board: [[str]], piece: str, rank: int, file: int, deltaRank: int, deltaFile: int, repeat: bool): 
+		
+		def inBoard(r: int, f: int)-> bool:
+			if r >= 0 and r < 8 and f >= 0 and f < 8:
+				return True
+			return False
+
+		if repeat:
+			while inBoard(rank, file):
+				if board[rank][file] == piece:
+					return { 'file': file, 'rank': rank }
+				file += deltaFile
+				rank += deltaRank
+		else:
 			file += deltaFile
 			rank += deltaRank
+			if inBoard(rank, file) and board[rank][file] == piece:
+				return { 'file': file, 'rank': rank }
+
 		return None
 
 
@@ -202,6 +285,13 @@ class Board:
 		
 		if movement.piece == 'R':
 			self.moveRook(movement, newBoard)
+			# ...
+
+		if movement.piece == 'Q':
+			self.moveQueen(movement, newBoard)
+
+		if movement.piece == 'K':
+			self.moveKing(movement, newBoard)
 
 		self.boards.append(newBoard)
 		
@@ -219,6 +309,54 @@ class Board:
 			print('| ')
 
 
-	def getAllBoards(self):
-		return self.boards
+	def addBoard(self, board: [[str]]):
+		self.boards.append(board)
+
+	def toFENposition(self ) -> str:
+		'''
+		FEN Notation: https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+		Example of initial position (only the board part)
+		rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
+		'''
+
+		def toFenPiece(boardPiece: str) -> str:
+			if boardPiece[0] == 'W':
+				return boardPiece[1].upper()
+			if boardPiece[0] == 'B':
+				return boardPiece[1].lower()
+			if boardPiece == ' ':
+				return ' '
+			raise Exception('was this a piece? {0}'.format(boardPiece))
+
+		if len(self.boards) < 1:
+			raise Exception('There are no boards')
+
+		board = self.boards[-1]
+		lines = []
+		for rank in range(7,-1, -1):
+			line = ""
+			for file in range(8):
+				line += board[rank][file]
+			lines.append(line)
+
+		boardWithSpaces = "/".join(lines)
+		boardWithoutSpaces = ""
+
+		spacesAcc = 0
+		for i in range(len(boardWithSpaces)):
+			if boardWithSpaces[i] != ' ':
+				if spacesAcc > 0:
+					boardWithoutSpaces += str(spacesAcc)
+					spacesAcc = 0
+				boardWithoutSpaces += boardWithSpaces[i]
+			if boardWithSpaces[i] == ' ':
+				spacesAcc += 1
+
+		if spacesAcc > 0:
+			boardWithoutSpaces += str(spacesAcc)
+		return boardWithoutSpaces
+
+
+
+
 
