@@ -28,7 +28,10 @@ def toRank(rank: str)-> int:
 	except:
 		raise Exception(('rank is not valid: {0}').format(rank))
 
-
+class PieceMovement:
+	def __init__(self, deltas: [(int,int)], isRepeated:bool):
+		self.deltas = deltas
+		self.isRepeated = isRepeated
 
 class Board:
 	'''
@@ -89,92 +92,96 @@ class Board:
 		board[rank][file] = piece
 
 	def moveBishop(self, movement: Movement, board: [[str]]):
-		file, rank, piece = self.getFRP(movement)
-
-		possibleBishops = []
-		for delta in [(1,1), (1,-1), (-1,-1),(-1,1)]:
-			whereFrom = self.findPieceWithDelta(board, piece, rank, file, delta[0], delta[1], repeat=True)
-			if whereFrom:
-				possibleBishops.append(whereFrom)
-
-		if len(possibleBishops) > 1:
-			if movement.disRank:
-				dr = toRank(movement.disRank)
-				possibleBishops = list(filter(lambda x : x['rank'] == dr, possibleBishops ))
-			if movement.disFile:
-				df = toFile(movement.disFile)
-				possibleBishops = list(filter(lambda x : x['file'] == df, possibleBishops ))
-		
-		if len(possibleBishops) == 1:
-			bishop = possibleBishops[0]
-			board[bishop['rank']][bishop['file']] = ' '
-		else:
-			raise Exception('Not possible to move the Bishop {0}'.format(movement))
-
-		board[rank][file] = piece
+		bishopMovement = PieceMovement(
+			[(1,1), (1,-1), (-1,1), (-1, -1)],
+			isRepeated=True
+		)
+		self.movePiece(board, movement, bishopMovement)
 	
 	def moveRook(self, movement: Movement, board: [[str]]):
-		file, rank, piece = self.getFRP(movement)
-
-		possibleRooks = []
-
-		for delta in [(0,1), (0,-1), (-1,0), (1, 0)]:
-			whereFrom = self.findPieceWithDelta(board, piece, rank, file, delta[0], delta[1], repeat=True)
-			if whereFrom:
-				possibleRooks.append(whereFrom)
-
-
-		if len(possibleRooks) > 1:
-			if movement.disRank:
-				dr = toRank(movement.disRank)
-				possibleRooks = list(filter(lambda x : x['rank'] == dr, possibleRooks ))
-			if movement.disFile:
-				df = toFile(movement.disFile)
-				possibleRooks = list(filter(lambda x : x['file'] == df, possibleRooks ))
-		
-		if len(possibleRooks) == 1:
-			rook = possibleRooks[0]
-			board[rook['rank']][rook['file']] = ' '
-		else:
-			raise Exception('Not possible to move the Rook {0}'.format(movement))
-
-		board[rank][file] = piece
+		rookMovement = PieceMovement(
+			[(0,1), (0,-1), (-1,0), (1, 0)],
+			isRepeated=True
+		)
+		self.movePiece(board, movement,rookMovement)
 
 	def moveKnight(self, movement: Movement, board: [[str]]):
+		knightMovement = PieceMovement(
+			[( 1, 2),( 1,-2),(-1, 2),(-1,-2),
+			 ( 2, 1),( 2,-1),(-2, 1),(-2,-1)],
+			isRepeated=False
+		)
+		self.movePiece(board, movement,knightMovement)
+
+	def moveQueen(self, movement: Movement, board:[[str]]):
+		queenMovement = PieceMovement(
+			[ ( 0, 1), ( 0,-1), ( 1, 0), (-1, 0),
+			  ( 1, 1), ( 1,-1), (-1,-1), (-1, 1) ],
+			isRepeated=True
+		)
+		self.movePiece(board, movement, queenMovement)
+
+	def moveKing(self, movement: Movement, board:[[str]]):
+		kingMovement = PieceMovement(
+			[ ( 0, 1), ( 0,-1), ( 1, 0), (-1, 0),
+			  ( 1, 1), ( 1,-1), (-1,-1), (-1, 1) ],
+			isRepeated=False
+		)
+		self.movePiece(board, movement, kingMovement)
+
+	def movePiece(self, board: [[str]], movement: Movement, pieceMovement: PieceMovement):
 		file, rank, piece = self.getFRP(movement)
 
+		possibleFroms = list(map(lambda deltas: self.getPieceInDirection(board, piece, (rank,file), deltas, pieceMovement.isRepeated), pieceMovement.deltas))
+		possibleFroms = list(filter( lambda x: x != None, possibleFroms))
 
+		# disambiguation
+		if movement.disFile:
+			df = toFile(movement.disFile)
+			possibleFroms = list(filter(lambda x : x['file'] == df, possibleFroms))
+		if movement.disRank:
+			dr = toRank(movement.disRank)
+			possibleFroms = list(filter(lambda x : x['rank'] == dr, possibleFroms))
+
+		# movement
+		if len(possibleFroms) != 1:
+			raise Exception('Not possible to move the Piece {0}'.format(movement))
+
+		pieceFrom = possibleFroms[0] 
+		board[rank][file] = piece
+		board[pieceFrom['rank']][pieceFrom['file']] = ' '
+
+
+	def getPieceInDirection(self, board: [[str]], piece: str, position:(int,int), direction:(int, int), repeat: bool): 
+		''' 
+		returns an object with file and rank of the given 'piece' in a certain direction
+		returns None if no piece is found is that direction
+		'''
+		# helper
 		def inBoard(r: int, f: int)-> bool:
 			if r >= 0 and r < 8 and f >= 0 and f < 8:
 				return True
 			return False
-		
-		varF = [ 2, 2, 1, 1,-2,-2,-1,-1]
-		varR = [ 1,-1, 2,-2,-1, 1,-2, 2]
-		
-		possibleKnights = []
-		for i in range(8):
-			testRank = rank+varR[i]
-			testFile = file+varF[i]
-			if inBoard(testRank, testFile) and board[testRank][testFile] == piece:
-				possibleKnights.append( { 'rank': testRank, 'file': testFile } )
 
-		if len(possibleKnights) > 1 :
-			knight = None
-			if movement.disFile:
-				df = toFile(movement.disFile)
-				possibleKnights = list(filter(lambda x : x['file'] == df, possibleKnights))
-			if movement.disRank:
-				dr = toRank(movement.disRank)
-				possibleKnights = list(filter(lambda x : x['rank'] == dr, possibleKnights))
+		rank = position[0]
+		file = position[1]
+		deltaRank = direction[0]
+		deltaFile = direction[1]
 
-		if len(possibleKnights) == 1:
-			knight = possibleKnights[0]
-			board[knight['rank']][knight['file']] = ' '
+		if repeat:
+			while inBoard(rank, file):
+				if board[rank][file] == piece:
+					return { 'file': file, 'rank': rank }
+				file += deltaFile
+				rank += deltaRank
 		else:
-			raise Exception('Not possible to move the Knight {0}'.format(movement))
-	
-		board[rank][file] = piece
+			file += deltaFile
+			rank += deltaRank
+			if inBoard(rank, file) and board[rank][file] == piece:
+				return { 'file': file, 'rank': rank }
+
+		return None
+
 
 	def castle(self, movement, board:[[str]]):
 		rookPiece = 'R'
@@ -197,96 +204,7 @@ class Board:
 			board[rank][toFile('a')] = ' '
 			board[rank][toFile('e')] = ' '
 
-	def moveQueen(self, movement: Movement, board:[[str]]):
-		file, rank, piece = self.getFRP(movement)
 
-		possibleQueens = []
-		deltas = [
-			#horizontals
-			( 0, 1),
-			( 0,-1),
-			( 1, 0),
-			(-1, 0),
-			#diagonals
-			( 1, 1),
-			( 1,-1),
-			(-1,-1),
-			(-1, 1)
-		]
-
-		for delta in deltas:
-			whereFrom = self.findPieceWithDelta(board, piece, rank, file, delta[0], delta[1], repeat=True)
-			if whereFrom:
-				possibleQueens.append(whereFrom)
-
-
-		if len(possibleQueens) > 1:
-			if movement.disRank:
-				dr = toRank(movement.disRank)
-				possibleQueens = list(filter(lambda x : x['rank'] == dr, possibleQueens ))
-			if movement.disFile:
-				df = toFile(movement.disFile)
-				possibleQueens = list(filter(lambda x : x['file'] == df, possibleQueens ))
-		
-		if len(possibleQueens) == 1:
-			queen = possibleQueens[0]
-			board[queen['rank']][queen['file']] = ' '
-		else:
-			raise Exception('Not possible to move the Queen {0}'.format(movement))
-
-		board[rank][file] = piece
-
-	def moveKing(self, movement: Movement, board:[[str]]):
-		file, rank, piece = self.getFRP(movement)
-
-		possibleKings = []
-		deltas = [
-			#horizontals
-			( 0, 1),
-			( 0,-1),
-			( 1, 0),
-			(-1, 0),
-			#diagonals
-			( 1, 1),
-			( 1,-1),
-			(-1,-1),
-			(-1, 1)
-		]
-
-		for delta in deltas:
-			whereFrom = self.findPieceWithDelta(board, piece, rank, file, delta[0], delta[1], repeat=False)
-			if whereFrom:
-				possibleKings.append(whereFrom)
-
-
-		if len(possibleKings) == 1:
-			king = possibleKings[0]
-			board[king ['rank']][king['file']] = ' '
-		else:
-			raise Exception('Not possible to move the King {0}'.format(movement))
-
-		board[rank][file] = piece
-
-	def findPieceWithDelta(self, board: [[str]], piece: str, rank: int, file: int, deltaRank: int, deltaFile: int, repeat: bool): 
-		
-		def inBoard(r: int, f: int)-> bool:
-			if r >= 0 and r < 8 and f >= 0 and f < 8:
-				return True
-			return False
-
-		if repeat:
-			while inBoard(rank, file):
-				if board[rank][file] == piece:
-					return { 'file': file, 'rank': rank }
-				file += deltaFile
-				rank += deltaRank
-		else:
-			file += deltaFile
-			rank += deltaRank
-			if inBoard(rank, file) and board[rank][file] == piece:
-				return { 'file': file, 'rank': rank }
-
-		return None
 
 
 	def makeMovement(self, movement: Movement):
