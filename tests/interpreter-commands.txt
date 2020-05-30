@@ -1,0 +1,6 @@
+from src import parser
+
+lexer = parser.ChessLexer()
+pr = parser.ChessParser()
+
+pr.parse(lexer.tokenize(" "))

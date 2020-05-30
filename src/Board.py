@@ -91,29 +91,27 @@ class Board:
 	def moveBishop(self, movement: Movement, board: [[str]]):
 		file, rank, piece = self.getFRP(movement)
 
-		# TODO: do as rooks,... actually I might need to disambiguate
-		whereFrom = self.findPieceWithDelta(board, piece, rank, file, -1, -1, repeat=True)
-		if whereFrom:
-			board[whereFrom['rank']][whereFrom['file']] = ' '
-			board[rank][file] = piece
-			return
+		possibleBishops = []
+		for delta in [(1,1), (1,-1), (-1,-1),(-1,1)]:
+			whereFrom = self.findPieceWithDelta(board, piece, rank, file, delta[0], delta[1], repeat=True)
+			if whereFrom:
+				possibleBishops.append(whereFrom)
 
-		whereFrom = self.findPieceWithDelta(board, piece, rank, file, -1, 1, repeat=True)
-		if whereFrom:
-			board[whereFrom['rank']][whereFrom['file']] = ' '
-			board[rank][file] = piece
-			return
-		whereFrom = self.findPieceWithDelta(board, piece, rank, file, 1, -1, repeat=True)
-		if whereFrom:
-			board[whereFrom['rank']][whereFrom['file']] = ' '
-			board[rank][file] = piece
-			return
-		whereFrom = self.findPieceWithDelta(board, piece, rank, file, 1, 1, repeat=True)
-		if whereFrom:
-			board[whereFrom['rank']][whereFrom['file']] = ' '
-			board[rank][file] = piece
-			return
-		raise Exception('not possible to move bishop like that {0}'.format(movement))
+		if len(possibleBishops) > 1:
+			if movement.disRank:
+				dr = toRank(movement.disRank)
+				possibleBishops = list(filter(lambda x : x['rank'] == dr, possibleBishops ))
+			if movement.disFile:
+				df = toFile(movement.disFile)
+				possibleBishops = list(filter(lambda x : x['file'] == df, possibleBishops ))
+		
+		if len(possibleBishops) == 1:
+			bishop = possibleBishops[0]
+			board[bishop['rank']][bishop['file']] = ' '
+		else:
+			raise Exception('Not possible to move the Bishop {0}'.format(movement))
+
+		board[rank][file] = piece
 	
 	def moveRook(self, movement: Movement, board: [[str]]):
 		file, rank, piece = self.getFRP(movement)
@@ -178,6 +176,26 @@ class Board:
 	
 		board[rank][file] = piece
 
+	def castle(self, movement, board:[[str]]):
+		rookPiece = 'R'
+		kingPiece = 'K'
+		rank = toRank(1)
+		if movement.color == 'B':
+			rank = toRank(8)
+			rookPiece = rookPiece.lower()
+			kingPiece = kingPiece.lower()
+
+		if movement.castleShort:
+			board[rank][toFile('g')] = kingPiece
+			board[rank][toFile('f')] = rookPiece
+			board[rank][toFile('h')] = ' '
+			board[rank][toFile('e')] = ' '
+
+		if movement.castleLong:
+			board[rank][toFile('c')] = kingPiece
+			board[rank][toFile('d')] = rookPiece
+			board[rank][toFile('a')] = ' '
+			board[rank][toFile('e')] = ' '
 
 	def moveQueen(self, movement: Movement, board:[[str]]):
 		file, rank, piece = self.getFRP(movement)
@@ -274,6 +292,8 @@ class Board:
 	def makeMovement(self, movement: Movement):
 		# add something to the board
 		newBoard = copy.deepcopy(self.boards[-1])
+
+
 		if movement.piece == 'p':
 			self.movePawn(movement, newBoard)
 
@@ -291,7 +311,10 @@ class Board:
 			self.moveQueen(movement, newBoard)
 
 		if movement.piece == 'K':
-			self.moveKing(movement, newBoard)
+			if movement.castleShort or movement.castleLong:
+				self.castle(movement, newBoard)
+			else:
+				self.moveKing(movement, newBoard)
 
 		self.boards.append(newBoard)
 		
@@ -312,6 +335,28 @@ class Board:
 	def addBoard(self, board: [[str]]):
 		self.boards.append(board)
 
+	def getLastBoard(self) -> [[str]]:
+		if len(self.boards) < 1:
+			raise Exception('There are no boards')
+		return self.boards[-1]
+
+	def addBoardInFEN(self, board: str ):
+		spacedBoard = ""
+		for i in range(len(board)):
+			if board[i].isdigit():
+				spacedBoard += " "*int(board[i])
+			else:
+				spacedBoard +=board[i]
+		files = spacedBoard.split('/')
+
+		assert len(files)== 8 , "bad input"
+		board = [list(file) for file in files]
+
+		board.reverse() # so white is UP
+		self.boards.append(board)
+
+
+
 	def toFENposition(self ) -> str:
 		'''
 		FEN Notation: https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -319,19 +364,7 @@ class Board:
 		rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
 		'''
 
-		def toFenPiece(boardPiece: str) -> str:
-			if boardPiece[0] == 'W':
-				return boardPiece[1].upper()
-			if boardPiece[0] == 'B':
-				return boardPiece[1].lower()
-			if boardPiece == ' ':
-				return ' '
-			raise Exception('was this a piece? {0}'.format(boardPiece))
-
-		if len(self.boards) < 1:
-			raise Exception('There are no boards')
-
-		board = self.boards[-1]
+		board = self.getLastBoard()
 		lines = []
 		for rank in range(7,-1, -1):
 			line = ""
