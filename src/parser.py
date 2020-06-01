@@ -94,7 +94,7 @@ class ChessParser(Parser):
 
 	@_('')
 	def empty(self, p):
-		pass
+		...
 
 	@_('SPACE', 'NEWLINE', 'empty')
 	def __(self, p):
@@ -147,7 +147,6 @@ class ChessParser(Parser):
 	@_('who where promotion')
 	def move(self, p):
 		...
-		#return ( p.who, p.where, p.promotion)
 	
 	@_('castle')
 	def move(self, p):
@@ -191,15 +190,12 @@ class ChessParser(Parser):
 			self.callbackFunction(self.currentMove)
 			self.newMovement()
 			
-		# return (p.move, p.modif)
-
 	@_('move modif')
 	def blackMovement(self, p):
 		self.currentMove.color = 'B'
 		if self.callbackFunction:
 			self.callbackFunction(self.currentMove)
 			self.newMovement()
-		# return (p.move, p.modif)
 
 	def error(self, p):
 		if p != None:

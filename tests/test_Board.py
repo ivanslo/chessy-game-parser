@@ -20,7 +20,7 @@ class TestGameController:
     '''
 
     def test_initialFen(self):
-        initialFen = self.board.toFENposition()
+        initialFen = self.board.getLastBoardInFEN()
         assert( initialFen == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
 
     def test_afterOneMoveFen(self):
@@ -35,7 +35,7 @@ class TestGameController:
             ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']
         ]
         self.board.addBoard(board_e4)
-        boardFen = self.board.toFENposition()
+        boardFen = self.board.getLastBoardInFEN()
         assert( boardFen == 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR')
     
     def test_afterTwoMovesFen(self):
@@ -50,7 +50,7 @@ class TestGameController:
             ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']
         ]
         self.board.addBoard(board_e4_c5)
-        boardFen = self.board.toFENposition()
+        boardFen = self.board.getLastBoardInFEN()
         assert( boardFen == 'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR')
 
 
@@ -66,7 +66,7 @@ class TestGameController:
             ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']
         ]
         self.board.addBoard(board_e4_c5_Nf3)
-        boardFen = self.board.toFENposition()
+        boardFen = self.board.getLastBoardInFEN()
         assert( boardFen == 'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R')
 
     def test_fenToBoard_OneMove(self):
