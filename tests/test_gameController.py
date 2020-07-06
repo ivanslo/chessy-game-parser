@@ -154,3 +154,80 @@ class TestBoardPositions:
 	def test_castle_both(self):
 		self.parser.parse(self.lexer.tokenize("1. Nf3 d5 2.e3 Bf5 3.Bb5+ Nd7 4.O-O c6 5.Ba4 Qc7 6.d4 O-O-O"))
 		assert(self.board.getLastBoardInFEN() == "2kr1bnr/ppqnpppp/2p5/3p1b2/B2P4/4PN2/PPP2PPP/RNBQ1RK1")
+
+class TestBoardGames:
+	parser = ""
+	lexer = ""
+	board = None
+
+	''' 
+	Games were taken from real places
+	'''
+	def setup_class(self):
+		self.parser = parser.ChessParser()
+		self.lexer = parser.ChessLexer()
+
+	def setup_method(self):
+		self.board = Board.Board()
+		self.parser.setCallbackFunction( lambda x: self.board.makeMovement(x) )
+
+	def test_wc2013_round6(self):
+		self.parser.parse(self.lexer.tokenize("""
+[Event "WCh 2013"]
+[Site "Chennai IND"]
+[Date "2013.11.16"]
+[Round "6"]
+[White "Anand, Viswanathan"]
+[Black "Carlsen, Magnus"]
+[Result "0-1"]
+[WhiteTitle "GM"]
+[BlackTitle "GM"]
+[WhiteElo "2775"]
+[BlackElo "2870"]
+[ECO "C65"]
+[Opening "Ruy Lopez"]
+[Variation "Berlin defence"]
+[WhiteFideId "5000017"]
+[BlackFideId "1503014"]
+[EventDate "2013.11.09"]
+
+1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d3 Bc5 5. c3 O-O 6. O-O Re8 7. Re1 a6 8. Ba4
+b5 9. Bb3 d6 10. Bg5 Be6 11. Nbd2 h6 12. Bh4 Bxb3 13. axb3 Nb8 14. h3 Nbd7 15.
+Nh2 Qe7 16. Ndf1 Bb6 17. Ne3 Qe6 18. b4 a5 19. bxa5 Bxa5 20. Nhg4 Bb6 21. Bxf6
+Nxf6 22. Nxf6+ Qxf6 23. Qg4 Bxe3 24. fxe3 Qe7 25. Rf1 c5 26. Kh2 c4 27. d4 Rxa1
+28. Rxa1 Qb7 29. Rd1 Qc6 30. Qf5 exd4 31. Rxd4 Re5 32. Qf3 Qc7 33. Kh1 Qe7 34.
+Qg4 Kh7 35. Qf4 g6 36. Kh2 Kg7 37. Qf3 Re6 38. Qg3 Rxe4 39. Qxd6 Rxe3 40. Qxe7
+Rxe7 41. Rd5 Rb7 42. Rd6 f6 43. h4 Kf7 44. h5 gxh5 45. Rd5 Kg6 46. Kg3 Rb6 47.
+Rc5 f5 48. Kh4 Re6 49. Rxb5 Re4+ 50. Kh3 Kg5 51. Rb8 h4 52. Rg8+ Kh5 53. Rf8 Rf4
+54. Rc8 Rg4 55. Rf8 Rg3+ 56. Kh2 Kg5 57. Rg8+ Kf4 58. Rc8 Ke3 59. Rxc4 f4 60.
+Ra4 h3 61. gxh3 Rg6 62. c4 f3 63. Ra3+ Ke2 64. b4 f2 65. Ra2+ Kf3 66. Ra3+ Kf4
+67. Ra8 Rg1 0-11
+"""))
+		assert(self.board.getLastBoardInFEN() == "R7/8/7p/8/1PP2k2/7P/5p1K/6r1")
+
+	def test_wc2013_round9(self):
+		self.parser.parse(self.lexer.tokenize("""
+[Event "WCh 2013"]
+[Site "Chennai IND"]
+[Date "2013.11.21"]
+[Round "9"]
+[White "Anand, Viswanathan"]
+[Black "Carlsen, Magnus"]
+[Result "0-1"]
+[WhiteTitle "GM"]
+[BlackTitle "GM"]
+[WhiteElo "2775"]
+[BlackElo "2870"]
+[ECO "E25"]
+[Opening "Nimzo-Indian"]
+[Variation "Saemisch variation"]
+[WhiteFideId "5000017"]
+[BlackFideId "1503014"]
+[EventDate "2013.11.09"]
+
+1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. f3 d5 5. a3 Bxc3+ 6. bxc3 c5 7. cxd5 exd5 8. e3
+c4 9. Ne2 Nc6 10. g4 O-O 11. Bg2 Na5 12. O-O Nb3 13. Ra2 b5 14. Ng3 a5 15. g5
+Ne8 16. e4 Nxc1 17. Qxc1 Ra6 18. e5 Nc7 19. f4 b4 20. axb4 axb4 21. Rxa6 Nxa6
+22. f5 b3 23. Qf4 Nc7 24. f6 g6 25. Qh4 Ne8 26. Qh6 b2 27. Rf4 b1=Q+ 28. Nf1 Qe1 0-1
+"""))
+		assert(self.board.getLastBoardInFEN() == "2bqnrk1/5p1p/5PpQ/3pP1P1/2pP1R2/2P5/6BP/4qNK1")

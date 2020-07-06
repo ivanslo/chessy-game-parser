@@ -178,6 +178,13 @@ class Board:
 			if board[rank][file] == ' ': # took the am'pasaund
 				board[rank-(1*side)][file] = ' '
 
+		if movement.crown:
+			piece = movement.crownTo
+			if movement.color == 'W':
+				piece = piece.upper()
+			if movement.color == 'B':
+				piece = piece.lower()
+
 		board[rank][file] = piece
 
 
@@ -264,9 +271,14 @@ class Board:
 		deltaFile = direction[1]
 
 		if repeat:
+			file += deltaFile
+			rank += deltaRank
 			while inBoard(rank, file):
 				if board[rank][file] == piece:
 					return { 'file': file, 'rank': rank }
+				elif board[rank][file] != ' ': 
+					# stop exploring in a direction if there is an obstructing piece
+					return None
 				file += deltaFile
 				rank += deltaRank
 		else:

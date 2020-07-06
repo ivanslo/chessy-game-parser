@@ -74,7 +74,7 @@ class ChessParser(Parser):
 
 	@_('empty')
 	def info(self, p):
-		return ()
+		return []
 
 	@_('info __ GAME_INFO __')
 	def info(self, p):
