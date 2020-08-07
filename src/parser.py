@@ -46,22 +46,43 @@ class ChessLexer(Lexer):
 
 
 class ChessParser(Parser):
+	gameCompletedCb = None
 	callbackFunction = None
 	tokens = ChessLexer.tokens
 	# debugfile = 'parser.out'
 	
-	start = 'game'
+	start = 'entry'
 
 	currentMove = Movement.Movement()
+
 	def newMovement(self):
 		self.currentMove = Movement.Movement()
 
 	def setCallbackFunction(self, cb):
 		self.callbackFunction = cb
 
+	def setGameCompletedCallback(self, cb):
+		self.gameCompletedCb = cb
+
+	#    Rules
+	# ----------
+
+	@_('games', 'game')
+	def entry(self, p):
+		return p
+
+	@_('games game')
+	def games(self, p):
+		return p.games + [ p.game ]
+
+	@_('game')
+	def games(self, p):
+		return [ p.game ]
 
 	@_('info __ movements result __')
 	def game(self, p):
+		if self.gameCompletedCb:
+			self.gameCompletedCb(p)
 		return p
 	
 	@_('RESULT')
@@ -177,7 +198,6 @@ class ChessParser(Parser):
 	@_('JUGADA_NRO __ whiteMovement __ blackMovement __')
 	def movement(self, p):
 		...
-
 
 	@_('JUGADA_NRO __ whiteMovement __')
 	def movement(self, p):

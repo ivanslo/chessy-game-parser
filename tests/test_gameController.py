@@ -160,9 +160,6 @@ class TestBoardGames:
 	lexer = ""
 	board = None
 
-	''' 
-	Games were taken from real places
-	'''
 	def setup_class(self):
 		self.parser = parser.ChessParser()
 		self.lexer = parser.ChessLexer()
@@ -231,3 +228,28 @@ Ne8 16. e4 Nxc1 17. Qxc1 Ra6 18. e5 Nc7 19. f4 b4 20. axb4 axb4 21. Rxa6 Nxa6
 22. f5 b3 23. Qf4 Nc7 24. f6 g6 25. Qh4 Ne8 26. Qh6 b2 27. Rf4 b1=Q+ 28. Nf1 Qe1 0-1
 """))
 		assert(self.board.getLastBoardInFEN() == "2bqnrk1/5p1p/5PpQ/3pP1P1/2pP1R2/2P5/6BP/4qNK1")
+
+
+class TestMultipleGames:
+	parser = ""
+	lexer = ""
+
+	def setup_class(self):
+		self.parser = parser.ChessParser()
+		self.lexer = parser.ChessLexer()
+
+	def test_wc2013_all(self, mocker):
+		callback = mocker.stub(name='game detected fn')
+		self.parser.setGameCompletedCallback(callback)
+		self.parser.parse(self.lexer.tokenize("""
+[Event "WCh 2013"]
+[Round "1"]
+
+1. d4 Nf6 2. c4 e6 1/2-1/2
+
+[Event "WCh 2013"]
+[Round "2"]
+
+1. d4 Nf6 2. c4 e6 1/2-1/2
+"""))
+		assert( 2 == callback.call_count )
