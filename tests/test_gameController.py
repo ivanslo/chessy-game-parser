@@ -23,13 +23,13 @@ class TestGameController:
 	
 	def test_callback(self, mocker):
 		callback = mocker.stub(name='callback fn')
-		self.parser.setCallbackFunction( callback )
+		self.parser.setMovementDetectedCallback( callback )
 		self.parser.parse(self.lexer.tokenize('1. e4 e5 2. Nc3 B3a1 3. a3'))
 		assert( 5 == callback.call_count )
 
 	def test_callback_object(self, mocker):
 		callback = mocker.stub(name='callback fn')
-		self.parser.setCallbackFunction( callback )
+		self.parser.setMovementDetectedCallback( callback )
 		self.parser.parse(self.lexer.tokenize('1. e4'))
 		assert( 1 == callback.call_count )
 		
@@ -50,7 +50,7 @@ class TestBoardPositions:
 		for each test case, a new board (starting from scratch) should be set up
 		'''
 		self.board = Board.Board()
-		self.parser.setCallbackFunction( lambda x: self.board.makeMovement(x) )
+		self.parser.setMovementDetectedCallback( lambda x: self.board.makeMovement(x) )
 
 
 	## Pawns
@@ -166,7 +166,7 @@ class TestBoardGames:
 
 	def setup_method(self):
 		self.board = Board.Board()
-		self.parser.setCallbackFunction( lambda x: self.board.makeMovement(x) )
+		self.parser.setMovementDetectedCallback( lambda x: self.board.makeMovement(x) )
 
 	def test_wc2013_round6(self):
 		self.parser.parse(self.lexer.tokenize("""
@@ -240,7 +240,7 @@ class TestMultipleGames:
 
 	def test_wc2013_all(self, mocker):
 		callback = mocker.stub(name='game detected fn')
-		self.parser.setGameCompletedCallback(callback)
+		self.parser.setGameFinishedCallback(callback)
 		self.parser.parse(self.lexer.tokenize("""
 [Event "WCh 2013"]
 [Round "1"]

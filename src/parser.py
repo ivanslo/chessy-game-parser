@@ -46,8 +46,9 @@ class ChessLexer(Lexer):
 
 
 class ChessParser(Parser):
-	gameCompletedCb = None
-	callbackFunction = None
+	gameFinishedCb = None
+	gameInfoDetectedCb = None
+	movementDetectedCb = None
 	tokens = ChessLexer.tokens
 	# debugfile = 'parser.out'
 	
@@ -58,11 +59,14 @@ class ChessParser(Parser):
 	def newMovement(self):
 		self.currentMove = Movement.Movement()
 
-	def setCallbackFunction(self, cb):
-		self.callbackFunction = cb
+	def setGameInfoDetectedCallback(self, cb):
+		self.gameInfoDetectedCb = cb
 
-	def setGameCompletedCallback(self, cb):
-		self.gameCompletedCb = cb
+	def setMovementDetectedCallback(self, cb):
+		self.movementDetectedCb = cb
+
+	def setGameFinishedCallback(self, cb):
+		self.gameFinishedCb = cb
 
 	#    Rules
 	# ----------
@@ -81,8 +85,8 @@ class ChessParser(Parser):
 
 	@_('info __ movements result __')
 	def game(self, p):
-		if self.gameCompletedCb:
-			self.gameCompletedCb(p)
+		if self.gameFinishedCb:
+			self.gameFinishedCb(p)
 		return p
 	
 	@_('RESULT')
@@ -99,10 +103,14 @@ class ChessParser(Parser):
 
 	@_('info __ GAME_INFO __')
 	def info(self, p):
+		if self.gameInfoDetectedCb:
+			self.gameInfoDetectedCb( p.GAME_INFO )
 		return p.info + [p.GAME_INFO]
 
 	@_('GAME_INFO')
 	def info(self, p):
+		if self.gameInfoDetectedCb:
+			self.gameInfoDetectedCb( p.GAME_INFO )
 		return [p.GAME_INFO]
 
 	@_('movements movement')
@@ -206,15 +214,15 @@ class ChessParser(Parser):
 	@_('move modif')
 	def whiteMovement(self, p):
 		self.currentMove.color = 'W'
-		if self.callbackFunction:
-			self.callbackFunction(self.currentMove)
+		if self.movementDetectedCb:
+			self.movementDetectedCb(self.currentMove)
 			self.newMovement()
 			
 	@_('move modif')
 	def blackMovement(self, p):
 		self.currentMove.color = 'B'
-		if self.callbackFunction:
-			self.callbackFunction(self.currentMove)
+		if self.movementDetectedCb:
+			self.movementDetectedCb(self.currentMove)
 			self.newMovement()
 
 	def error(self, p):
