@@ -3,20 +3,16 @@ import GameController
 
 
 @click.command()
-@click.option('--pgnGame', required=True, help='Game to be parsed (PGN Format)')
-@click.option('--outputFile', required=True, help='File to be created')
+@click.option('--pgnFile', required=True, help='File to be parsed (PGN Format)')
 def command(**kwargs):
-    pgnGame = ""
-    with open(kwargs['pgngame'], 'r') as inputGame:
-        lines = inputGame.readlines()
-        pgnGame = "".join(lines)
+	inputFilename = kwargs['pgnfile']
 
-    processedGame = GameController.processGame(pgnGame)
-    with open(kwargs['outputfile'], 'w') as f:
-        f.write(processedGame)
+	# very trivial way to check for the extension
+	if inputFilename[-4:] != ".pgn":
+		print("The input file should be .pgn")
+		return
 
-
+	GameController.processPGNFile(inputFilename)
 
 if __name__ == "__main__":
-    # parser()
-    command()
+	command()

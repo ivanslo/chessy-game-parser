@@ -19,16 +19,19 @@ class Game:
 	def addInfo(self,info):
 		self.info.append(info)
 
-def processGame(gamePGN: str):
+
+def processPGNFile(pgnFileName: str):
 	lexer  = pr.ChessLexer()
 	parser = pr.ChessParser()
 	board = None
 	game = None
+	gameNumber = 0
 
 	def newGame():
-		nonlocal board, game
+		nonlocal board, game, gameNumber
 		board = Board.Board()
 		game = Game()
+		gameNumber += 1
 		# add initial board
 		game.addStep(board.getLastBoardInFEN())
 
@@ -40,15 +43,19 @@ def processGame(gamePGN: str):
 		game.addInfo(meta)
 
 	def processGameFinished(asd):
-		print(game.toJSON())
+		outputFileName = "%s_%d.json" % (pgnFileName[:-4], gameNumber)
+		with open(outputFileName, 'w') as outputFile:
+			outputFile.writelines(game.toJSON())
 		newGame()
 
+	# Setup
 	parser.setGameInfoDetectedCallback( processGameInformation )
 	parser.setGameFinishedCallback( processGameFinished )
 	parser.setMovementDetectedCallback( processMovement )
 	newGame()
 
-	# parse the rest of the game
-	parser.parse(lexer.tokenize(gamePGN))
-	# return in JSON Format
-	return None
+	# parse the input file
+	with open(pgnFileName, 'r') as inputGame:
+		pgnFile = "".join(inputGame.readlines())
+		parser.parse(lexer.tokenize(pgnFile))
+
