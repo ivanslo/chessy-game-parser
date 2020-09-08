@@ -128,7 +128,7 @@ class Board:
 		return f, r, p
 
 
-	# movements into the board
+	# movements in the board
 	# -----------------------------------------------
 	def makeMovement(self, movement: Movement):
 		'''
@@ -312,7 +312,7 @@ class Board:
 			board[rank][toFile('e')] = ' '
 
 	
-	# helpers
+	# debug
 	# ---------------------------------------------
 	def printBoard(self):
 		for file in range(8):

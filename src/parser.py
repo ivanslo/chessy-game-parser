@@ -8,14 +8,14 @@ import Movement
 # Lexer
 # -----------------------------------
 class ChessLexer(Lexer):
-	tokens = { JUGADA_NRO, GAME_INFO, SPACE, PIECE, 
+	tokens = { MOVE_NUMBER, GAME_INFO, SPACE, PIECE, 
 			RANK, FILE, CASTLE_SHORT, CASTLE_LONG, 
 			CHECK, TAKE, RESULT, PROMOTION, NEWLINE }
 
 	
 	RESULT = r'[012/]+-[012/]+'
 	GAME_INFO = r'\[.+\]\n'
-	JUGADA_NRO = r'\d+\.'
+	MOVE_NUMBER = r'\d+\.'
 	PIECE = r'[QKNRB]'
 	FILE = r'[abcdefgh]'
 	RANK= r'[12345678]'
@@ -28,7 +28,7 @@ class ChessLexer(Lexer):
 	NEWLINE = r'\n'
 
 	# parse int
-	def JUGADA_NRO(self, t):
+	def MOVE_NUMBER(self, t):
 		t.value = int(t.value[:-1])
 		return t
 	
@@ -203,11 +203,11 @@ class ChessParser(Parser):
 	def modif(self, p):
 		return ''
 
-	@_('JUGADA_NRO __ whiteMovement __ blackMovement __')
+	@_('MOVE_NUMBER __ whiteMovement __ blackMovement __')
 	def movement(self, p):
 		...
 
-	@_('JUGADA_NRO __ whiteMovement __')
+	@_('MOVE_NUMBER __ whiteMovement __')
 	def movement(self, p):
 		...
 
