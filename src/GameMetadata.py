@@ -31,3 +31,6 @@ class GameMetadata:
         id = id.replace("/", "")
         id = id.replace("-", "")
         return id
+
+    def getInfo(self):
+        return self.gameInfoDict

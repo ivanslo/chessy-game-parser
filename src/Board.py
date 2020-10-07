@@ -1,5 +1,6 @@
 import sys
 import Movement
+import GameMetadata
 import copy
 
 def toFile(file: str)-> int:
@@ -52,9 +53,19 @@ class Board:
 			['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']
 	]
 
+
 	def __init__(self):
 		self.boards = [ self.IdentityBoard ] 
+		self.gameInfo = GameMetadata.GameMetadata()
 
+	def addGameInfo(self, info):
+		self.gameInfo.add(info)
+
+	def getGameInfo(self):
+		return self.gameInfo.getInfo()
+
+	def getGameId(self) -> str:
+		return self.gameInfo.getId()
 
 	# board manipulation
 	# -----------------------------------------------
@@ -174,7 +185,7 @@ class Board:
 			if board[rank-(1*side)][fromFile] == piece:
 				board[rank-(1*side)][fromFile] = ' '
 			else:
-				raise Exception("no way that's possible")
+				raise Exception("no way that's possible: {0}".format(movement))
 			if board[rank][file] == ' ': # took the am'pasaund
 				board[rank-(1*side)][file] = ' '
 
@@ -245,9 +256,10 @@ class Board:
 			dr = toRank(movement.disRank)
 			possibleFroms = list(filter(lambda x : x['rank'] == dr, possibleFroms))
 
+		# TODO: If possibleFroms > 1, one/two might be blocked by check conditions, and should be discarded
 		# movement
 		if len(possibleFroms) != 1:
-			raise Exception('Not possible to move the Piece {0}'.format(movement))
+			raise Exception('Not possible to move the Piece [{0}] in game [{1}]'.format(movement, self.gameInfo.getInfo()))
 
 		pieceFrom = possibleFroms[0] 
 		board[rank][file] = piece

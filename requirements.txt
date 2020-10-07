@@ -2,3 +2,4 @@ click
 sly
 pytest
 pytest_mock
+boto3

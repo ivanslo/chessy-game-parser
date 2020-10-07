@@ -83,7 +83,7 @@ class ChessParser(Parser):
 	def games(self, p):
 		return [ p.game ]
 
-	@_('info __ movements result __')
+	@_('info __ movements __ result __')
 	def game(self, p):
 		if self.gameFinishedCb:
 			self.gameFinishedCb(p)

@@ -3,11 +3,13 @@ import sys
 import Board
 
 import json
+import copy
 
 class Game:
 	def __init__(self):
 		self.steps = []
-		self.info = []
+		self.info = {}
+		self.id = ""
 
 	def toJSON(self):
 		return json.dumps(self, default=lambda o: o.__dict__,
@@ -16,16 +18,15 @@ class Game:
 	def addStep(self, fen):
 		self.steps.append({'board': fen})
 
-	def addInfo(self,info):
-		self.info.append(info)
 
-
-def processPGNFile(pgnFileName: str):
+def processPGNText(pgnText: str):
 	lexer  = pr.ChessLexer()
 	parser = pr.ChessParser()
 	board = None
 	game = None
 	gameNumber = 0
+
+	outputGames = []
 
 	def newGame():
 		nonlocal board, game, gameNumber
@@ -36,16 +37,20 @@ def processPGNFile(pgnFileName: str):
 		game.addStep(board.getLastBoardInFEN())
 
 	def processMovement(aa):
+		nonlocal board, game
 		board.makeMovement(aa)
 		game.addStep(board.getLastBoardInFEN())
 
 	def processGameInformation(meta):
-		game.addInfo(meta)
+		nonlocal board
+		board.addGameInfo(meta)
 
 	def processGameFinished(asd):
-		outputFileName = "%s_%d.json" % (pgnFileName[:-4], gameNumber)
-		with open(outputFileName, 'w') as outputFile:
-			outputFile.writelines(game.toJSON())
+		nonlocal game, outputGames
+		game.info = board.getGameInfo()
+		game.id = board.getGameId()
+		outputGames.append(copy.deepcopy(game))
+
 		newGame()
 
 	# Setup
@@ -55,7 +60,14 @@ def processPGNFile(pgnFileName: str):
 	newGame()
 
 	# parse the input file
-	with open(pgnFileName, 'r') as inputGame:
-		pgnFile = "".join(inputGame.readlines())
-		parser.parse(lexer.tokenize(pgnFile))
+	parser.parse(lexer.tokenize(pgnText))
+	return outputGames
 
+def processPGNFile(pgnFileName: str):
+	with open(pgnFileName, 'r') as inputGame:
+		pgnText = "".join(inputGame.readlines())
+		processedGames = processPGNText(pgnText)
+		for i, pg in enumerate(processedGames):
+			outputFileName = "%s_%d.json" % (pgnFileName[:-4], i)
+			with open(outputFileName, 'w') as outputFile:
+				outputFile.writelines(pg.toJSON())
