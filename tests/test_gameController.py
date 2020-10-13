@@ -1,13 +1,14 @@
 '''
 The next lines are there to deal with python files importing each other inside `src`
+alternatively, I need to set `PYTHONPATH=../src` before running pytest
 '''
 import os.path
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 
 
-from src import parser, Board
+import parser, Board
 import pytest
 from pytest_mock import mocker
 
@@ -32,6 +33,9 @@ class TestGameController:
 		self.parser.setMovementDetectedCallback( callback )
 		self.parser.parse(self.lexer.tokenize('1. e4'))
 		assert( 1 == callback.call_count )
+
+
+
 		
 class TestBoardPositions:
 	parser = ""
