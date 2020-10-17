@@ -25,7 +25,7 @@ class ChessLexer(Lexer):
 	TAKE = r'x'
 	PROMOTION = r'='
 	SPACE = r' '
-	NEWLINE = r'\n'
+	NEWLINE = r'\n+'
 
 	# parse int
 	def MOVE_NUMBER(self, t):
@@ -38,7 +38,7 @@ class ChessLexer(Lexer):
 		return t
 	
 	def error(self, t):
-		raise Exception("Illegal token '%s'" % t.value[0])
+		raise Exception("Illegal token '%s' line '%d'" % (t.value[0], t.lineno))
 
 # -----------------------------------
 # Parser
