@@ -256,8 +256,10 @@ class Board:
 			dr = toRank(movement.disRank)
 			possibleFroms = list(filter(lambda x : x['rank'] == dr, possibleFroms))
 
-		# TODO: If possibleFroms > 1, one/two might be blocked by check conditions, and should be discarded
-		# movement
+		# illegal movements
+		if len(possibleFroms) != 1:
+			possibleFroms = self.removeIllegalMoves(possibleFroms, movement, board)
+
 		if len(possibleFroms) != 1:
 			raise Exception('Not possible to move the Piece [{0}] in game [{1}]'.format(movement, self.gameInfo.getInfo()))
 
@@ -323,18 +325,92 @@ class Board:
 			board[rank][toFile('a')] = ' '
 			board[rank][toFile('e')] = ' '
 
+	def removeIllegalMoves(self, possibleFroms: [], movement: Movement, board: [[str]]) -> []:
+		'''
+		this function removes possible movements by taking in consideration which ones will generate a check.
+		I.e: there might be 2 rooks in conditions to perform a movement, but one would uncover a check. So that should be
+		discarded as illegal.
+		Examples:
+		* Classics GM, Gausdal NOR, 2002.04.17, round 8, Carlsen vs Bluvshtein, movement 42. ... Rg8
+		* Montevideo sim, Montevideo, 1911.??.??, Capablanca vs Rivas Costa, movement 9. Ne2
+		'''
+
+		# Strategy: Clone the board. simulate one movement, if check is present then that's illegal.
+		kingPiece = 'K'
+		if movement.color == 'B':
+			kingPiece = kingPiece.lower()
+
+
+		filteredPossibleFroms = []
+		# Strategy: Clone the board. One possible piece by one: remove it from its place.
+		# If there is no check against itself, that's a legal piece to move.
+		for possibleFrom in possibleFroms:
+			b = copy.deepcopy(board)
+			b[possibleFrom['rank']][possibleFrom['file']] = ' ' # remove piece
+			if not self.thereIsCheckAgaist(movement.color, b):
+				filteredPossibleFroms.append(possibleFrom)
+
+		return filteredPossibleFroms
 	
+	def thereIsCheckAgaist(self, kingColor: str, board:[[str]]) -> bool:
+		kingPiece = 'K'
+		queenPiece = 'q'
+		bishopPiece = 'b'
+		rookPiece = 'r'
+		if kingColor == 'B':
+			kingPiece = kingPiece.lower()
+			queenPiece = queenPiece.upper()
+			bishopPiece = bishopPiece.upper()
+			rookPiece = rookPiece.upper()
+
+		# identify king position
+		kingPos = (0,0)
+		for i in range(8):
+			for j in range(8):
+				if board[i][j] == kingPiece:
+					kingPos = (i,j)
+
+
+		# definition of pieces to search in which direction
+		# note: Knights are not present, since their impact doesn't change when the enemy moves
+		dir_pieces = [ 
+			{ 	'delta': (-1,-1), 
+				'pieces': [bishopPiece, queenPiece] },
+			{ 	'delta': (-1,+1), 
+				'pieces': [bishopPiece, queenPiece] },
+			{ 	'delta': (+1,-1), 
+				'pieces': [bishopPiece, queenPiece] },
+			{ 	'delta': (+1,+1), 
+				'pieces': [bishopPiece, queenPiece] },
+			{ 	'delta': (-1, 0), 
+				'pieces': [rookPiece, queenPiece] },
+			{ 	'delta': (1, 0), 
+				'pieces': [rookPiece, queenPiece] },
+			{ 	'delta': (0, 1), 
+				'pieces': [rookPiece, queenPiece] },
+			{ 	'delta': (0, -1), 
+				'pieces': [rookPiece, queenPiece] }
+			]
+
+		for dir_piece in dir_pieces:
+			for p in dir_piece['pieces']:
+				if self.getPieceInDirection( board, p, kingPos, dir_piece['delta'], True):
+					return True
+		return False
+
 	# debug
 	# ---------------------------------------------
-	def printBoard(self):
+	def printLastBoard(self):
+		self.printGivenBoard(self.boards[-1])
+
+	def printGivenBoard(self, board: [[str]]):
 		for file in range(8):
 			print("| ---- ", end = '')
 		print('| ')
 		for rank in range(7,-1, -1):
 			for file in range(8):
-				print("| %3s  " % (self.boards[-1][rank][file]), end = '')
+				print("| %3s  " % (board[rank][file]), end = '')
 			print('| ')
 			for file in range(8):
 				print("| ---- ", end = '')
 			print('| ')
-
