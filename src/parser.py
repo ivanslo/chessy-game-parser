@@ -10,10 +10,11 @@ import Movement
 class ChessLexer(Lexer):
 	tokens = { MOVE_NUMBER, GAME_INFO, SPACE, PIECE, 
 			RANK, FILE, CASTLE_SHORT, CASTLE_LONG, 
-			CHECK, TAKE, RESULT, PROMOTION, NEWLINE }
+			CHECK, TAKE, RESULT, RESULT_2, PROMOTION, NEWLINE }
 
 	
 	RESULT = r'[012/]+-[012/]+'
+	RESULT_2 = r'\*'
 	GAME_INFO = r'\[.+\]\n'
 	MOVE_NUMBER = r'\d+\.'
 	PIECE = r'[QKNRB]'
@@ -92,6 +93,10 @@ class ChessParser(Parser):
 	@_('RESULT')
 	def result(self, p):
 		return p.RESULT
+	
+	@_('RESULT_2')
+	def result(self, p):
+		return p.RESULT_2
 
 	@_('empty')
 	def result(self, p):

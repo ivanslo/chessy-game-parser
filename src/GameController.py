@@ -66,7 +66,7 @@ def processPGNText(pgnText: str):
 def processPGNFile(pgnFileName: str):
 	with open(pgnFileName, 'r') as inputGame:
 		pgnText = "".join(inputGame.readlines())
-		processedGames = processPGNText(pgnText)
+		processedGames = processPGNText(pgnText.replace('\r\n', '\n'))
 		for i, pg in enumerate(processedGames):
 			outputFileName = "%s_%d.json" % (pgnFileName[:-4], i)
 			with open(outputFileName, 'w') as outputFile:

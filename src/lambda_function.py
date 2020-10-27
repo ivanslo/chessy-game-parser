@@ -3,6 +3,7 @@ import logging
 import urllib.parse
 import boto3
 import os
+import signal
 
 import  GameController
 
@@ -14,19 +15,26 @@ logger = logging.getLogger()
 level = os.environ['LOG_LEVEL']
 logger.setLevel(int(level))
 
+processingFile = ""
+
 def lambda_handler(event, context):
+    global processingFile
+    # Setup alarm for when I'm close (1 second) to timeout
+    signal.alarm(int(context.get_remaining_time_in_millis() / 1000) - 1)
+    
     # Get the object from the event and show its content type
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
     logger.debug('Handling bucket/key: {}/{}.'.format(bucket, key))
 
+    processingFile = key
     response = {}
     body = ""
     parsedGames = []
 
     try:
         response = s3.get_object(Bucket=bucket, Key=key)
-        body = response['Body'].read().decode('utf-8')
+        body = response['Body'].read().decode('utf-8').replace('\r\n','\n')
     except Exception as e:
         logger.error('Exception getting oject from S3: {}'.format(e))
         save_failed_game(key, "reading")
@@ -61,3 +69,11 @@ def lambda_handler(event, context):
 def save_failed_game(filename: str, when: str):
     table = dynamodb.Table('chess_games_failed')
     table.put_item(Item={'filename': filename, 'when': when})
+    
+def timeout_handler(_signal, _frame):
+    global processingFile
+    '''Handle SIGALARM'''
+    save_failed_game(processingFile, 'not enough time')
+    raise Exception('Not enough Time')
+
+signal.signal(signal.SIGALRM, timeout_handler)
