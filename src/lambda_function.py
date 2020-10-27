@@ -4,6 +4,7 @@ import urllib.parse
 import boto3
 import os
 import signal
+from datetime import datetime
 
 import  GameController
 
@@ -56,7 +57,6 @@ def lambda_handler(event, context):
                 for k in game.info.keys():
                     item_db[k] = str(game.info[k])
                 item_db['jsonFile'] = game.toJSON()
-
                 batch.put_item(Item=item_db)
 
     except Exception as e:
@@ -64,11 +64,22 @@ def lambda_handler(event, context):
         save_failed_game(key, "writing")
         raise e
     
+    # disconnect signal alarm
+    signal.alarm(0)
+    save_succeeded_game(key)
     logger.info('PGN handled and written successfully')
 
-def save_failed_game(filename: str, when: str):
+def save_failed_game(filename: str, reason: str):
+    signal.alarm(0)
     table = dynamodb.Table('chess_games_failed')
-    table.put_item(Item={'filename': filename, 'when': when})
+    when = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    table.put_item(Item={'filename': filename, 'reason': reason, 'datetime': when})
+
+def save_succeeded_game(filename: str):
+    signal.alarm(0)
+    table = dynamodb.Table('chess_games_succeeded')
+    when = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    table.put_item(Item={'filename': filename, 'datetime': when})
     
 def timeout_handler(_signal, _frame):
     global processingFile
