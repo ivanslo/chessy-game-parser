@@ -1,7 +1,7 @@
 from sly import Lexer, Parser
 import sys
 
-import Movement
+from . import Movement
 
 
 # -----------------------------------

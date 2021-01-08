@@ -1,6 +1,5 @@
 import sys
-import Movement
-import GameMetadata
+from . import Movement, GameMetadata
 import copy
 
 def toFile(file: str)-> int:

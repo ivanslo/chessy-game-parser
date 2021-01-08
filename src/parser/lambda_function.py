@@ -1,3 +1,5 @@
+# Lambda Function: ChessyPGNParser
+
 import json
 import logging
 import urllib.parse
