@@ -22,9 +22,11 @@ sqsUrl = os.environ['SQS_URL']
 logger.setLevel(int(level))
 
 processingFile = ""
+processingBucket = ""
 
 def lambda_handler(event, context):
     global processingFile
+    global processingBucket
     # Setup alarm for when I'm close (1 second) to timeout
     signal.alarm(int(context.get_remaining_time_in_millis() / 1000) - 1)
     
@@ -32,6 +34,7 @@ def lambda_handler(event, context):
     key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
     logger.debug('Handling bucket/key: {}/{}.'.format(bucket, key))
 
+    processingBucket = bucket
     processingFile = key
     
     response = {}
@@ -67,16 +70,17 @@ send the `chunks` to SQS as messages
 '''
 def sendToSQS(chunks):
     global processingFile
+    global processingBucket
 
-    def makeMessageFor(fn: str, f: int, t: int, n: int) :
+    def makeMessageFor(b: str, fn: str, f: int, t: int, n: int) :
         return {
             'Id': 'id_{0}'.format(n),
-            'MessageBody': 'filename: {0}\nfrom:{1}\nto:{2}'.format(fn,f,t)
+            'MessageBody': 'bucket:{0}\nfilename:{1}\nfrom:{2}\nto:{3}'.format(b, fn,f,t)
         }
 
     messages = []
     for i, (f,t) in enumerate(chunks):
-        messages.append(makeMessageFor(processingFile, f, t, i))
+        messages.append(makeMessageFor(processingBucket, processingFile, f, t, i))
     
     maxMessages = 10 # 10 per batch
     i = 0

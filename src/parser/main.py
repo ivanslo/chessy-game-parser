@@ -1,5 +1,5 @@
 import click
-from parser import GameController
+import GameController
 
 
 @click.command()

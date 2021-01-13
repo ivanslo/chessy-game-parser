@@ -1,6 +1,6 @@
-from . import parser as pr
+import parser as pr
 import sys
-from . import Board
+import Board
 
 import json
 import copy

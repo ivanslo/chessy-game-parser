@@ -4,6 +4,8 @@ __pycache__
 .vscode
 
 toLambdaParserZip
+toLambdaParserPartialZip
 toLambdaSplitterZip
 lambdaParser.zip
+lambdaParserPartial.zip
 lambdaSplitter.zip

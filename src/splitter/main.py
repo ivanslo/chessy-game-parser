@@ -1,5 +1,5 @@
 import click
-from splitter import PGNFile
+import PGNFile
 
 
 @click.command()
