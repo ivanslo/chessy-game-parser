@@ -98,11 +98,15 @@ def lambda_handler(event, context):
 def getDatetime()-> str :
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+def getProcessingId() -> str:
+    return '{}_{}_{}_{}'.format(toProcess_Bucket, toProcess_FileKey, toProcess_LineFrom, toProcess_LineTo)
+
 def save_failed_game(reason: str):
     signal.alarm(0)
-    table = dynamodb.Table('chess_games_failed')
+    table = dynamodb.Table('pgn_files_failed')
     when = getDatetime()
     table.put_item(Item={
+        'id': getProcessingId(),
         'bucket': toProcess_Bucket,
         'filename': toProcess_FileKey,
         'lineFrom': toProcess_LineFrom,
@@ -113,9 +117,10 @@ def save_failed_game(reason: str):
 
 def save_succeeded_game(gamesQuantity: int):
     signal.alarm(0)
-    table = dynamodb.Table('chess_games_succeeded')
+    table = dynamodb.Table('pgn_files_succeeded')
     when = getDatetime()
     table.put_item(Item={
+        'id': getProcessingId(),
         'bucket': toProcess_Bucket,
         'filename': toProcess_FileKey,
         'lineFrom': toProcess_LineFrom,
