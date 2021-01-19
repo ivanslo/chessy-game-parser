@@ -51,7 +51,7 @@ def lambda_handler(event, context):
 
     ## Processing
     gameDelimiters = PGNFile.getGameBoundaryLines(fileBody)
-    chunks = PGNFile.groupBoundaries(gameDelimiters, 100)
+    chunks = PGNFile.groupBoundaries(gameDelimiters, 40)
 
     ## Sending
     try: 

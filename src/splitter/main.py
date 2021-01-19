@@ -21,7 +21,7 @@ def getGameLines(pgnFileName: str):
 		lines = ig.readlines()
 		boundaries = PGNFile.getGameBoundaryLines(lines)
 
-		chunks = PGNFile.groupBoundaries(boundaries, 200)
+		chunks = PGNFile.groupBoundaries(boundaries, 40)
 		
 		for (f,t) in chunks:
 			print('{0} {1}'.format(f,t))
@@ -30,7 +30,7 @@ def getChunks(pgnFileName: str):
 	with open(pgnFileName, 'r') as inputGame:
 		lines = inputGame.readlines()
 		boundaries = PGNFile.getGameBoundaryLines(lines)
-		chunks = PGNFile.groupBoundaries(boundaries, 200)
+		chunks = PGNFile.groupBoundaries(boundaries, 40)
 		for i, (f,t) in enumerate(chunks):
 			outputFileName = "%s_chunked_%d.pgn" % (pgnFileName[:-4], i)
 			with open(outputFileName, 'w') as outputFile:
