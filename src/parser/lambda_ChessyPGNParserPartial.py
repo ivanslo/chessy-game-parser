@@ -84,7 +84,6 @@ def lambda_handler(event, context):
                 item_db['jsonFile'] = game.toJSON()
                 item_db['addedDate'] = getDatetime()
                 batch.put_item(Item=item_db)
-
     except Exception as e:
         logger.error('Exception Writing to DB: {}'.format(e))
         save_failed_game("writing")

@@ -21,6 +21,7 @@ def getGameLines(pgnFileName: str):
 		lines = ig.readlines()
 		boundaries = PGNFile.getGameBoundaryLines(lines)
 
+		print('games # {}', len(boundaries))
 		chunks = PGNFile.groupBoundaries(boundaries, 40)
 		
 		for (f,t) in chunks:
