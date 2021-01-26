@@ -4,7 +4,7 @@ alternatively, I need to set `PYTHONPATH=../src` before running pytest
 '''
 import os.path
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/parser")))
 
 
 import GameMetadata
