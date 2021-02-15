@@ -27,7 +27,7 @@ def lambda_handler(event, context):
     t  = "_to_"
     if match == None:
         # does-not throw
-        logger.log("Malformed SQS Message received: {} ".format(sqsBody))
+        logger.error("Malformed SQS Message received: {} ".format(sqsBody))
     else:
         (b,fk,f,t) = match.groups()
         logger.debug('Handling bucket/key/from/to: {}/{}/{}/{}'.format(b,fk,f,t))
