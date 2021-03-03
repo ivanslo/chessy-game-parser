@@ -13,12 +13,14 @@ import pytest
 with patch.dict(os.environ, {'LOG_LEVEL': '3'}):
     import lambda_ChessyPGNFailedProcess as L
 
+
+
+# Test Data
 _bucket='aBucket'
 _filename='aFilename'
 _from='0'
 _to='20'
 _time='01-01-01 10:00:02'
-
 lambdaEvent = { 'Records': [{'body': 'bucket:{}\nfilename:{}\nfrom:{}\nto:{}'.format(_bucket,_filename,_from,_to)}] }
 lambdaEvent_bad = { 'Records': [{'body': 'bad_sqs_message'}] }
 

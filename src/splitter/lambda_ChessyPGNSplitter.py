@@ -12,7 +12,6 @@ import sys
 import PGNFile
 
 s3 = boto3.client('s3')
-dynamodb = boto3.resource('dynamodb')
 sqs = boto3.client('sqs')
 
 # logger set to the environment variable level

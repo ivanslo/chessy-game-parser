@@ -1,4 +1,4 @@
-# Lambda Function: ChessyPGNParser
+# Lambda Function: ChessyPGNParserPartial
 
 import json
 import logging
