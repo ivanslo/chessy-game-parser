@@ -63,6 +63,20 @@ def processPGNText(pgnText: str):
 	parser.parse(lexer.tokenize(pgnText))
 	return outputGames
 
+
+def processPGNFilePartial(pgnFileName: str, lower: int, upper: int):
+	with open(pgnFileName, 'r') as inputGame:
+		body = "".join(inputGame.readlines())
+		body = body.replace('\r\n', '\n')
+		bodyLines = body.split('\n')
+		partialBody = '\n'.join(bodyLines[lower:upper])
+		processedGames = processPGNText(partialBody)
+		for i, pg in enumerate(processedGames):
+			outputFileName = "%s_partial_%d.json" % (pgnFileName[:-4], i)
+			with open(outputFileName, 'w') as outputFile:
+				outputFile.writelines(pg.toJSON())
+
+
 def processPGNFile(pgnFileName: str):
 	with open(pgnFileName, 'r') as inputGame:
 		pgnText = "".join(inputGame.readlines())
