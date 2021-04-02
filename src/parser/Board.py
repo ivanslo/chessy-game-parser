@@ -332,6 +332,10 @@ class Board:
 		Examples:
 		* Classics GM, Gausdal NOR, 2002.04.17, round 8, Carlsen vs Bluvshtein, movement 42. ... Rg8
 		* Montevideo sim, Montevideo, 1911.??.??, Capablanca vs Rivas Costa, movement 9. Ne2
+
+		It also allow movements that will cover the check.
+		Example:
+		* FIDE World Rapid 2014, Dubai UAE, 2014.06.16, round 2.2, Carlsen vs Guseinov, movement 8 .. Ne7
 		'''
 
 		# Strategy: Clone the board. simulate one movement, if check is present then that's illegal.
@@ -339,12 +343,17 @@ class Board:
 		if movement.color == 'B':
 			kingPiece = kingPiece.lower()
 
+		movFile, movRank, movPiece = self.getFileRankPiece(movement)
 
 		filteredPossibleFroms = []
-		# Strategy: Clone the board. One possible piece by one: remove it from its place.
-		# If there is no check against itself, that's a legal piece to move.
+		# Strategy: Clone the board. One possible movement, one by one:
+		# 	- simulate the movement (put the piece there) 
+		#   - check there's no check against itself: that's a legal movement
+		# this will remove "possibleMoves" that uncover checks.
 		for possibleFrom in possibleFroms:
 			b = copy.deepcopy(board)
+			# simulate movement
+			b[movRank][movFile] = movPiece
 			b[possibleFrom['rank']][possibleFrom['file']] = ' ' # remove piece
 			if not self.thereIsCheckAgaist(movement.color, b):
 				filteredPossibleFroms.append(possibleFrom)

@@ -153,3 +153,20 @@ class TestGameController:
 
         boardFEN = self.board.getLastBoardInFEN()
         assert( boardFEN == 'rnbqk2r/pp4pp/4pn2/2pp2B1/1b1P4/2NBQP2/PPP1N1PP/R3K2R')
+
+    def  test_filterOutPossibleMovement_3(self):
+        '''
+        Example: FIDE World Rapid 2014, Dubai UAE, 2014.06.16, round 2.2, Carlsen vs Guseinov, movement 8 .. Ne7
+        '''
+        board_initial_in_FEN = 'r1bqk1nr/pp3ppp/2nb4/1B1p4/3p4/5N2/PPPN1PPP/R1BQR1K1'
+        self.board.addBoardInFEN(board_initial_in_FEN)
+        # Note: the movment doesn't say which Knight to move
+        # One of them uncovers a check, and the other will cover the Rook Check.
+        movement = Movement.Movement()
+        movement.piece= 'N'
+        movement.destFile = 'e'
+        movement.destRank = '7'
+        movement.color = 'B'
+        self.board.makeMovement(movement)
+        boardFEN = self.board.getLastBoardInFEN()
+        assert( boardFEN == 'r1bqk2r/pp2nppp/2nb4/1B1p4/3p4/5N2/PPPN1PPP/R1BQR1K1')

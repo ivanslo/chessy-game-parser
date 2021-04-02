@@ -232,6 +232,29 @@ Ne8 16. e4 Nxc1 17. Qxc1 Ra6 18. e5 Nc7 19. f4 b4 20. axb4 axb4 21. Rxa6 Nxa6
 22. f5 b3 23. Qf4 Nc7 24. f6 g6 25. Qh4 Ne8 26. Qh6 b2 27. Rf4 b1=Q+ 28. Nf1 Qe1 0-1
 """))
 		assert(self.board.getLastBoardInFEN() == "2bqnrk1/5p1p/5PpQ/3pP1P1/2pP1R2/2P5/6BP/4qNK1")
+	def test_fideWorldRapid2014_2_2(self):
+		self.parser.parse(self.lexer.tokenize("""
+[Event "FIDE World Rapid 2014"]
+[Site "Dubai UAE"]
+[Date "2014.06.16"]
+[Round "2.2"]
+[White "Guseinov,G"]
+[Black "Carlsen,M"]
+[Result "1/2-1/2"]
+[WhiteElo "2613"]
+[BlackElo "2881"]
+[ECO "C08"]
+
+1.e4 e6 2.d4 d5 3.Nd2 c5 4.exd5 exd5 5.Bb5+ Nc6 6.Ngf3 cxd4 7.O-O Bd6 8.Re1+ Ne7
+9.Nxd4 O-O 10.N2b3 Qc7 11.h3 a6 12.Bd3 Ne5 13.Bf4 N7g6 14.Bxg6 fxg6 15.Bxe5 Bxe5
+16.c3 Qd6 17.Qd3 Bd7 18.Re2 Rae8 19.Rae1 g5 20.Nd2 g4 21.hxg4 Bh2+ 22.Kf1 Rxe2
+23.Kxe2 Bxg4+ 24.f3 Bd7 25.Kd1 Bf4 26.Kc2 Qf6 27.N2b3 Be8 28.Nf5 Kh8 29.Nbd4 Bg6
+30.g4 Be5 31.Kd1 h6 32.Qe3 Re8 33.Qd2 Kh7 34.a3 a5 35.Re2 Qa6 36.Re1 Bf4
+37.Qc2 Rxe1+ 38.Kxe1 Qf6 39.Qe2 Bf7 40.Kd1 g6 41.Ne3 h5 42.gxh5 gxh5 43.Ng2 Bh6
+44.Qd3+ Bg6 45.Qb5 h4 46.Qd7+ Kg8 47.Qc8+ Kh7 48.Qd7+ Kg8 49.Qc8+ Kh7 50.Qd7+ Kh8
+51.Qc8+ Kh7  1/2-1/2
+"""))
+		assert(self.board.getLastBoardInFEN() == "2Q5/1p5k/5qbb/p2p4/3N3p/P1P2P2/1P4N1/3K4")
 
 
 class TestMultipleGames:
