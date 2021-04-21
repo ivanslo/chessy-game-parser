@@ -5,7 +5,7 @@ rm -rf toLambdaParserZip lambdaParser.zip
 
 mkdir toLambdaParserZip
 
-cp -R env/lib/python3.7/site-packages/sly toLambdaParserZip
+cp -R env/lib/python3.8/site-packages/sly toLambdaParserZip
 cp src/parser/*.py toLambdaParserZip
 
 cd toLambdaParserZip
