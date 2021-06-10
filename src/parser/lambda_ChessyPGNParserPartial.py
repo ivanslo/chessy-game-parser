@@ -59,7 +59,7 @@ def lambda_handler(event, context):
         body = response['Body'].read().decode('utf-8').replace('\r\n','\n')
     except Exception as e:
         logger.error('Exception getting oject from S3: {}'.format(e))
-        save_failed_game("reading")
+        save_failed_gamefile("reading")
         raise e
 
     bodyLines = body.split('\n')
@@ -70,14 +70,22 @@ def lambda_handler(event, context):
         parsedGames = GameController.processPGNText(partialBody)
     except Exception as e:
         logger.error('Exception Parsing: {}'.format(e))
-        save_failed_game("parsing")
+        save_failed_gamefile("parsing")
         raise e
     
+    duplicatedKeysErrors = []
     try:
         table = dynamodb.Table('chess_games')
         with table.batch_writer() as batch:
+            batchedIds= set([])
             for game in parsedGames:
                 item_db = {}
+                # avoid batching multiple items w same key
+                if game.id in batchedIds:
+                    duplicatedKeysErrors.append(game.id)
+                    continue
+                batchedIds.add(game.id)
+
                 item_db['id'] = str(game.id)
                 for k in game.info.keys():
                     item_db[k] = str(game.info[k])
@@ -86,12 +94,16 @@ def lambda_handler(event, context):
                 batch.put_item(Item=item_db)
     except Exception as e:
         logger.error('Exception Writing to DB: {}'.format(e))
-        save_failed_game("writing")
+        save_failed_gamefile("writing")
         raise e
     
+    if len(duplicatedKeysErrors) > 0:
+        for duplicatedKey in duplicatedKeysErrors:
+            save_failed_game('Duplicated Key: {}'.format(duplicatedKey))
+
     # disconnect signal alarm
     signal.alarm(0)
-    save_succeeded_game( len(parsedGames) )
+    save_succeeded_game( len(parsedGames) - len(duplicatedKeysErrors) )
     logger.info('Partial PGN handled and written successfully')
 
 def getDatetime()-> str :
@@ -101,6 +113,20 @@ def getProcessingId() -> str:
     return '{}_{}_{}_{}'.format(toProcess_Bucket, toProcess_FileKey, toProcess_LineFrom, toProcess_LineTo)
 
 def save_failed_game(reason: str):
+    signal.alarm(0)
+    table = dynamodb.Table('chess_games_failed')
+    when = getDatetime()
+    table.put_item(Item={
+        'id': getProcessingId(),
+        'bucket': toProcess_Bucket,
+        'filename': toProcess_FileKey,
+        'lineFrom': toProcess_LineFrom,
+        'lineTo':toProcess_LineTo,
+        'reason': reason,
+        'datetime': when
+        })
+
+def save_failed_gamefile(reason: str):
     signal.alarm(0)
     table = dynamodb.Table('pgn_files_failed')
     when = getDatetime()
@@ -131,7 +157,7 @@ def save_succeeded_game(gamesQuantity: int):
 def timeout_handler(_signal, _frame):
     global toProcess_FileKey
     '''Handle SIGALARM'''
-    save_failed_game('not enough time')
+    save_failed_gamefile('not enough time')
     raise Exception('Not enough Time')
 
 signal.signal(signal.SIGALRM, timeout_handler)

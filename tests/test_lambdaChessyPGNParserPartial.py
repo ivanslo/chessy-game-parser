@@ -20,7 +20,8 @@ _to='20'
 _time='01-01-01 10:00:02'
 _msgBody = 'bucket:{0}\nfilename:{1}\nfrom:{2}\nto:{3}'.format(_bucket,_filename,_from,_to)
 class ParsedGame:
-    id = 1
+    def __init__(self, id):
+        self.id = id
     info = {
         'key1': 'value1',
         'key2': 'value2'
@@ -144,7 +145,7 @@ class TestLambdaChessyPGNParserPartial:
         mockTable.batch_writer.return_value.__enter__.return_value = mockBatch
         mockBatch.put_item.side_effect = mocker.Mock(side_effect=Exception('put item failed'))
 
-        pg = ParsedGame()
+        pg = ParsedGame(1)
         mockGameController.processPGNText.return_value = [pg]
 
         with pytest.raises(Exception) as e_info:
@@ -173,7 +174,7 @@ class TestLambdaChessyPGNParserPartial:
         mockTable.batch_writer.return_value.__enter__.return_value = mockBatch
         mockDynamo.Table.return_value = mockTable
 
-        pg = ParsedGame()
+        pg = ParsedGame(1)
         mockGameController.processPGNText.return_value = [pg]
 
         L.lambda_handler(lambdaEvent, mockContext)
@@ -199,8 +200,8 @@ class TestLambdaChessyPGNParserPartial:
         mockTable.batch_writer.return_value.__enter__.return_value = mockBatch
         mockDynamo.Table.return_value = mockTable
 
-        pg1 = ParsedGame()
-        pg2 = ParsedGame()
+        pg1 = ParsedGame(1)
+        pg2 = ParsedGame(2)
         mockGameController.processPGNText.return_value = [pg1, pg2]
 
         L.lambda_handler(lambdaEvent, mockContext)
@@ -214,3 +215,68 @@ class TestLambdaChessyPGNParserPartial:
 
         mockTable.put_item.assert_called_once()
         mockTable.put_item.assert_called_once_with(Item=mockAddedDbItem(2))
+
+    def test_processGame_writes_duplicated_id(self, mocker):
+        (mockS3, mockSQS, mockDynamo, mockContext, mockGameController, mockTime) = getMocks(mocker)
+        mocker.patch.object(L, 's3', mockS3)
+        mocker.patch.object(L, 'dynamodb', mockDynamo)
+        mocker.patch.object(L, 'GameController',mockGameController)
+        mocker.patch.object(L, 'getDatetime', mockTime)
+        mockBatch = mocker.Mock()
+        mockTable = mocker.MagicMock()
+        mockTable.batch_writer.return_value.__enter__.return_value = mockBatch
+        mockDynamo.Table.return_value = mockTable
+
+        pg1 = ParsedGame(1)
+        pg2 = ParsedGame(1)
+        mockGameController.processPGNText.return_value = [pg1, pg2]
+
+        L.lambda_handler(lambdaEvent, mockContext)
+
+        mockDynamo.Table.assert_any_call('chess_games')
+        mockDynamo.Table.assert_any_call('pgn_files_succeeded')
+        mockDynamo.Table.assert_any_call('chess_games_failed')
+
+        # good game
+        assert( mockBatch.put_item.call_count == 1 )
+        mockBatch.put_item.assert_any_call(Item=mockSuccessDbItem(pg1))
+        # file things
+        assert( mockTable.put_item.call_count == 2 )
+        mockTable.put_item.assert_any_call(Item=mockAddedDbItem(1))
+        mockTable.put_item.assert_any_call(Item=mockFailedDbItem('Duplicated Key: 1'))
+
+    def test_processGame_writes_duplicated_id_2(self, mocker):
+        (mockS3, mockSQS, mockDynamo, mockContext, mockGameController, mockTime) = getMocks(mocker)
+        mocker.patch.object(L, 's3', mockS3)
+        mocker.patch.object(L, 'dynamodb', mockDynamo)
+        mocker.patch.object(L, 'GameController',mockGameController)
+        mocker.patch.object(L, 'getDatetime', mockTime)
+        mockBatch = mocker.Mock()
+        mockTable = mocker.MagicMock()
+        mockTable.batch_writer.return_value.__enter__.return_value = mockBatch
+        mockDynamo.Table.return_value = mockTable
+
+        pg1 = ParsedGame(1)
+        pg2 = ParsedGame(2)
+        pg3 = ParsedGame(3)
+        pg4 = ParsedGame(3) # duplicated
+        mockGameController.processPGNText.return_value = [pg1, pg2, pg3, pg4]
+
+        L.lambda_handler(lambdaEvent, mockContext)
+
+        mockDynamo.Table.assert_any_call('chess_games')
+        mockDynamo.Table.assert_any_call('pgn_files_succeeded')
+        mockDynamo.Table.assert_any_call('chess_games_failed')
+
+        # good game
+        assert( mockBatch.put_item.call_count == 3 )
+        mockBatch.put_item.assert_any_call(Item=mockSuccessDbItem(pg1))
+        mockBatch.put_item.assert_any_call(Item=mockSuccessDbItem(pg2))
+        mockBatch.put_item.assert_any_call(Item=mockSuccessDbItem(pg3))
+
+        assert( mockTable.put_item.call_count == 2 )
+        # file things
+        mockTable.put_item.assert_any_call(Item=mockAddedDbItem(3))
+        # duplicated key
+        mockTable.put_item.assert_any_call(Item=mockFailedDbItem('Duplicated Key: 3'))
+
