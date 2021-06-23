@@ -186,9 +186,10 @@ class ChessParser(Parser):
 	def move(self, p):
 		...
 
-	@_('TAKE', 'empty')
-	def take(self, p):
-		self.currentMove.take = True
+	# NOTE: apparently it's not needed
+	# @_('TAKE', 'empty')
+	# def take(self, p):
+	# 	self.currentMove.take = True
 
 	@_('CASTLE_SHORT')
 	def castle(self, p):

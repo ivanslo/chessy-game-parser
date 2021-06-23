@@ -34,12 +34,12 @@ def processPGNText(pgnText: str):
 		game = Game()
 		gameNumber += 1
 		# add initial board
-		game.addStep(board.getLastBoardInFEN())
+		game.addStep(board.getLastStep())
 
 	def processMovement(aa):
 		nonlocal board, game
 		board.makeMovement(aa)
-		game.addStep(board.getLastBoardInFEN())
+		game.addStep(board.getLastStep())
 
 	def processGameInformation(meta):
 		nonlocal board

@@ -72,6 +72,9 @@ class Board:
 		self.boards.append(board)
 
 
+	def getLastStep(self) -> {}:
+		return { 'board': self.getLastBoardInFEN() }
+
 	def getLastBoard(self) -> [[str]]:
 		if len(self.boards) < 1:
 			raise Exception('There are no boards')

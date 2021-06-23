@@ -6,6 +6,7 @@ import os.path
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/parser")))
 
+import unittest
 import GameController
 
 class TestGameControllerReal:
@@ -24,7 +25,7 @@ class TestGameControllerReal:
 		assert( result[0].info["Event"] == "Havana" )
 		assert( len(result[0].steps) == movements+1 )
 
-	def test_processPGNText_1(self):
+	def test_processPGNText_2(self):
 		result = GameController.processPGNText(
 """
 [Event "Anand-Carlsen World Championship"]
@@ -50,3 +51,20 @@ class TestGameControllerReal:
 
 		assert( result[1].id == "GashimovMemorial_ShamkirAZE_20150421_5" )
 		assert( len(result[1].steps) == movements+1 )
+	
+	def test_processPGNText_3(self):
+		result = GameController.processPGNText(
+"""
+[Event "Anand-Carlsen World Championship"]
+[Site "Chennai IND"]
+[Date "2013.11.21"]
+[EventDate "2013.11.07"]
+[Round "9"]
+
+1.d4 Nf6 2.c4 e6 3.Nc3 Bb4  1-1
+""")
+		movements = 6
+		assert( result[0].id == "AnandCarlsenWorldChampionship_ChennaiIND_20131121_9" )
+		assert( len(result[0].steps) == movements+1 )
+		assert( result[0].steps[0] == { 'board':"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR" })
+		assert( result[0].steps[1] == { 'board':"rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR"})
