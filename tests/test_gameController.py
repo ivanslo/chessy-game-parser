@@ -58,6 +58,13 @@ class TestBoardPositions:
 
 
 	## Pawns
+	def test_pawn_basic(self):
+		self.parser.parse(self.lexer.tokenize('1. e4 e5'))
+		assert(self.board.getLastBoardInFEN() == 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR')
+		boardDict = self.board.getLastBoardDict()
+		assert(boardDict['r1'] == {'pos': 'a8'})
+		assert(boardDict['P5'] == {'pos': 'e4'})
+		assert(boardDict['p5'] == {'pos': 'e5'})
 
 	def test_pawn(self):
 		self.parser.parse(self.lexer.tokenize('1. e4 e5 2. d4 d5 3. dxe5'))
@@ -76,7 +83,7 @@ class TestBoardPositions:
 
 	def test_ambiguous_bishop(self):
 		# 4 bishops per side
-		self.board.addBoardInFEN("2bk1b2/8/1b1b4/1B6/5B2/8/8/2B1KB2")
+		self.board.setupBoardInFEN("2bk1b2/8/1b1b4/1B6/5B2/8/8/2B1KB2")
 		self.parser.parse(self.lexer.tokenize("1. Bfd3 Bdc5 2. Bce3 Bfd6 3. Ba4 Bxf4"))
 		assert(self.board.getLastBoardInFEN() == "2bk4/8/1b6/2b5/B4b2/3BB3/8/4K3")
 
@@ -100,7 +107,7 @@ class TestBoardPositions:
 
 	def test_ambiguous_rooks(self):
 		# three rooks
-		self.board.addBoardInFEN("2k5/8/5R2/3R4/5R2/8/2K5/8")
+		self.board.setupBoardInFEN("2k5/8/5R2/3R4/5R2/8/2K5/8")
 		self.parser.parse(self.lexer.tokenize("1. Rf8+ Kc7"))
 		assert(self.board.getLastBoardInFEN() == "5R2/2k5/8/3R4/5R2/8/2K5/8")
 		self.parser.parse(self.lexer.tokenize("2. Rdf5 Kc6"))
@@ -117,15 +124,15 @@ class TestBoardPositions:
 
 	def test_ambiguous_queen(self):
 		initial_three_queen = "6Q1/6QQ/8/2k5/8/8/2K5/8"
-		self.board.addBoardInFEN(initial_three_queen)
+		self.board.setupBoardInFEN(initial_three_queen)
 		self.parser.parse(self.lexer.tokenize("1. Qhh8")) #disambiguation with file
 		assert(self.board.getLastBoardInFEN() == "6QQ/6Q1/8/2k5/8/8/2K5/8")
 		
-		self.board.addBoardInFEN(initial_three_queen)
+		self.board.setupBoardInFEN(initial_three_queen)
 		self.parser.parse(self.lexer.tokenize("1. Q8h8")) #disambiguation with rank
 		assert(self.board.getLastBoardInFEN() == "7Q/6QQ/8/2k5/8/8/2K5/8")
 
-		self.board.addBoardInFEN(initial_three_queen)
+		self.board.setupBoardInFEN(initial_three_queen)
 		self.parser.parse(self.lexer.tokenize("1. Qg7h8")) #disambiguation with file and rank
 		assert(self.board.getLastBoardInFEN() == "6QQ/7Q/8/2k5/8/8/2K5/8")
 

@@ -74,7 +74,7 @@ class TestGameController:
 
     def test_fenToBoard_OneMove(self):
         fen_e4 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR"
-        self.board.addBoardInFEN(fen_e4)
+        self.board.setupBoardInFEN(fen_e4)
         board = self.board.getLastBoard()
         assert( board == [
             ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
@@ -88,7 +88,7 @@ class TestGameController:
 
     def test_fenToBoard_ThreeMoves(self):
         fen_e4_c5_Nf3 = 'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R'
-        self.board.addBoardInFEN(fen_e4_c5_Nf3)
+        self.board.setupBoardInFEN(fen_e4_c5_Nf3)
         board = self.board.getLastBoard()
         assert( board == [
             ['R', 'N', 'B', 'Q', 'K', 'B', ' ', 'R'],
@@ -103,7 +103,7 @@ class TestGameController:
     def test_randomBoard(self):
         fen_board = '8/4k3/3b1q2/2ppn3/2B3bP/2N1B1K1/P3N3/R2Q3R'
         # corroborate in lichess that the output board is correct
-        self.board.addBoardInFEN(fen_board)
+        self.board.setupBoardInFEN(fen_board)
         board = self.board.getLastBoard()
         assert( board == [
             ['R', ' ', ' ', 'Q', ' ', ' ', ' ', 'R'],
@@ -123,7 +123,7 @@ class TestGameController:
         Example: Classics GM, Gausdal NOR, 2002.04.17, round 8, Carlsen vs Bluvshtein, movement 42. ... Rg8
         '''
         board_initial_in_FEN = '5r2/p4p1k/6rb/8/4Q1R1/2P1p2P/PP5P/7K'
-        self.board.addBoardInFEN(board_initial_in_FEN)
+        self.board.setupBoardInFEN(board_initial_in_FEN)
         # Note: the movement doesn't say which of the two rooks to move.s
         # The board discard the one in g6 -because its illegal- and use the one in f8
         movement = Movement.Movement()
@@ -141,7 +141,7 @@ class TestGameController:
         Example: Montevideo sim, Montevideo, 1911.??.??, Capablanca vs Rivas Costa, movement 9. Ne2
         '''
         board_initial_in_FEN = 'rnbqk2r/pp4pp/4pn2/2pp2B1/1b1P4/2NBQP2/PPP3PP/R3K1NR'
-        self.board.addBoardInFEN(board_initial_in_FEN)
+        self.board.setupBoardInFEN(board_initial_in_FEN)
         # Note: the movement doesn't say which of the two Knigths to move
         # The board discard the one in c3 -because its illegal- and use the one in g1
         movement = Movement.Movement()
@@ -159,7 +159,7 @@ class TestGameController:
         Example: FIDE World Rapid 2014, Dubai UAE, 2014.06.16, round 2.2, Carlsen vs Guseinov, movement 8 .. Ne7
         '''
         board_initial_in_FEN = 'r1bqk1nr/pp3ppp/2nb4/1B1p4/3p4/5N2/PPPN1PPP/R1BQR1K1'
-        self.board.addBoardInFEN(board_initial_in_FEN)
+        self.board.setupBoardInFEN(board_initial_in_FEN)
         # Note: the movment doesn't say which Knight to move
         # One of them uncovers a check, and the other will cover the Rook Check.
         movement = Movement.Movement()

@@ -5,6 +5,7 @@ import Board
 import json
 import copy
 
+
 class Game:
 	def __init__(self):
 		self.steps = []
@@ -15,8 +16,12 @@ class Game:
 		return json.dumps(self, default=lambda o: o.__dict__,
 			sort_keys=True, indent=2)
 
-	def addStep(self, fen):
-		self.steps.append({'board': fen})
+	def toDict(self):
+		## convert itself into a dictionary/map
+		pass
+
+	def addStep(self, step):
+		self.steps.append( step )
 
 
 def processPGNText(pgnText: str):
@@ -83,5 +88,7 @@ def processPGNFile(pgnFileName: str):
 		processedGames = processPGNText(pgnText.replace('\r\n', '\n'))
 		for i, pg in enumerate(processedGames):
 			outputFileName = "%s_%d.json" % (pgnFileName[:-4], i)
+			print("------------")
+			# print(pg.toJSON())
 			with open(outputFileName, 'w') as outputFile:
 				outputFile.writelines(pg.toJSON())
