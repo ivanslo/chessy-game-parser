@@ -78,44 +78,45 @@ class Board:
 	]
 
 	InitialArrangement = {
-		'r1': { 'pos': "a8"}, # 'taken': False, 'face': "r" },
-		'n1': { 'pos': "b8"}, # 'taken': False, 'face': "n" },
-		'b1': { 'pos': "c8"}, # 'taken': False, 'face': "b" },
-		'q1': { 'pos': "d8"}, # 'taken': False, 'face': "q" },
-		'k1': { 'pos': "e8"}, # 'taken': False, 'face': "k" },
-		'b2': { 'pos': "f8"}, # 'taken': False, 'face': "b" },
-		'n2': { 'pos': "g8"}, # 'taken': False, 'face': "n" },
-		'r2': { 'pos': "h8"}, # 'taken': False, 'face': "r" },
-		'p1': { 'pos': "a7"}, # 'taken': False, 'face': "p" },
-		'p2': { 'pos': "b7"}, # 'taken': False, 'face': "p" },
-		'p3': { 'pos': "c7"}, # 'taken': False, 'face': "p" },
-		'p4': { 'pos': "d7"}, # 'taken': False, 'face': "p" },
-		'p5': { 'pos': "e7"}, # 'taken': False, 'face': "p" },
-		'p6': { 'pos': "f7"}, # 'taken': False, 'face': "p" },
-		'p7': { 'pos': "g7"}, # 'taken': False, 'face': "p" },
-		'p8': { 'pos': "h7"}, # 'taken': False, 'face': "p" },
-		'R1': { 'pos': "a1"}, # 'taken': False, 'face': "R" },
-		'N1': { 'pos': "b1"}, # 'taken': False, 'face': "N" },
-		'B1': { 'pos': "c1"}, # 'taken': False, 'face': "B" },
-		'Q1': { 'pos': "d1"}, # 'taken': False, 'face': "Q" },
-		'K1': { 'pos': "e1"}, # 'taken': False, 'face': "K" },
-		'B2': { 'pos': "f1"}, # 'taken': False, 'face': "B" },
-		'N2': { 'pos': "g1"}, # 'taken': False, 'face': "N" },
-		'R2': { 'pos': "h1"}, # 'taken': False, 'face': "R" },
-		'P1': { 'pos': "a2"}, # 'taken': False, 'face': "P" },
-		'P2': { 'pos': "b2"}, # 'taken': False, 'face': "P" },
-		'P3': { 'pos': "c2"}, # 'taken': False, 'face': "P" },
-		'P4': { 'pos': "d2"}, # 'taken': False, 'face': "P" },
-		'P5': { 'pos': "e2"}, # 'taken': False, 'face': "P" },
-		'P6': { 'pos': "f2"}, # 'taken': False, 'face': "P" },
-		'P7': { 'pos': "g2"}, # 'taken': False, 'face': "P" },
-		'P8': { 'pos': "h2"}, # 'taken': False, 'face': "P" },
+		'r1': { 'pos': "a8" , 'face': "r" , 'taken': False },
+		'n1': { 'pos': "b8" , 'face': "n" , 'taken': False },
+		'b1': { 'pos': "c8" , 'face': "b" , 'taken': False },
+		'q1': { 'pos': "d8" , 'face': "q" , 'taken': False },
+		'k1': { 'pos': "e8" , 'face': "k" , 'taken': False },
+		'b2': { 'pos': "f8" , 'face': "b" , 'taken': False },
+		'n2': { 'pos': "g8" , 'face': "n" , 'taken': False },
+		'r2': { 'pos': "h8" , 'face': "r" , 'taken': False },
+		'p1': { 'pos': "a7" , 'face': "p" , 'taken': False },
+		'p2': { 'pos': "b7" , 'face': "p" , 'taken': False },
+		'p3': { 'pos': "c7" , 'face': "p" , 'taken': False },
+		'p4': { 'pos': "d7" , 'face': "p" , 'taken': False },
+		'p5': { 'pos': "e7" , 'face': "p" , 'taken': False },
+		'p6': { 'pos': "f7" , 'face': "p" , 'taken': False },
+		'p7': { 'pos': "g7" , 'face': "p" , 'taken': False },
+		'p8': { 'pos': "h7" , 'face': "p" , 'taken': False },
+		'R1': { 'pos': "a1" , 'face': "R" , 'taken': False },
+		'N1': { 'pos': "b1" , 'face': "N" , 'taken': False },
+		'B1': { 'pos': "c1" , 'face': "B" , 'taken': False },
+		'Q1': { 'pos': "d1" , 'face': "Q" , 'taken': False },
+		'K1': { 'pos': "e1" , 'face': "K" , 'taken': False },
+		'B2': { 'pos': "f1" , 'face': "B" , 'taken': False },
+		'N2': { 'pos': "g1" , 'face': "N" , 'taken': False },
+		'R2': { 'pos': "h1" , 'face': "R" , 'taken': False },
+		'P1': { 'pos': "a2" , 'face': "P" , 'taken': False },
+		'P2': { 'pos': "b2" , 'face': "P" , 'taken': False },
+		'P3': { 'pos': "c2" , 'face': "P" , 'taken': False },
+		'P4': { 'pos': "d2" , 'face': "P" , 'taken': False },
+		'P5': { 'pos': "e2" , 'face': "P" , 'taken': False },
+		'P6': { 'pos': "f2" , 'face': "P" , 'taken': False },
+		'P7': { 'pos': "g2" , 'face': "P" , 'taken': False },
+		'P8': { 'pos': "h2" , 'face': "P" , 'taken': False },
 	}
 
 	def __init__(self):
 		self.boards = [ self.IdentityBoard ] 
 		self.gameInfo = GameMetadata.GameMetadata()
 		self.boardsDict = [self.InitialArrangement]
+		self.isInCheck = False
 
 	def addGameInfo(self, info):
 		self.gameInfo.add(info)
@@ -133,10 +134,33 @@ class Board:
 
 
 	def getLastStep(self) -> dict:
-		return {
+		step = {
 			'board': self.getLastBoardInFEN() ,
-			'boardDict': self.boardsDict[-1]
-			}
+			'boardDict': self.getLastBoardDict() ,
+			'boardDictDiff': self.boardDictDiff()
+		}
+		if self.isInCheck:
+			step['check'] = self.isInCheck
+		return step
+
+	def boardDictDiff(self) -> dict:
+		if len(self.boardsDict) == 1:
+			return self.boardsDict[0]
+
+		last = self.boardsDict[-1]
+		prevLast = self.boardsDict[-2]
+		diff = {}
+		for key in last:
+			if last[key] == prevLast[key]:
+				continue
+			diff[key] = last[key]
+
+		return diff
+
+	def getLastBoardDict(self) -> dict:
+		if len(self.boards) < 1:
+			raise Exception('There are no boards')
+		return self.boardsDict[-1]
 
 	def getLastBoard(self) -> [[str]]:
 		if len(self.boards) < 1:
@@ -171,7 +195,7 @@ class Board:
 					k = 1
 					while boardDict.get('{}{}'.format(element, k)) != None:
 						k += 1
-					boardDict['{}{}'.format(element,k)] = { 'pos': fromFileRank(j, 7-i) }
+					boardDict['{}{}'.format(element,k)] = { 'pos': fromFileRank(j, 7-i), 'taken': False, 'face': element }
 					j += 1
 		self.boardsDict.append(boardDict)
 
@@ -181,7 +205,7 @@ class Board:
 		position = fromFileRank(file, rank)
 
 		for key in boardDict:
-			if boardDict[key]['pos'] == position:
+			if boardDict[key]['pos'] == position and boardDict[key]['taken'] == False:
 				return key
 		return None
 
@@ -265,11 +289,13 @@ class Board:
 
 		self.boardsDict.append(newBoardDict)
 		self.boards.append(newBoard)
+		self.isInCheck = movement.check
 
 
 	def movePawn(self, movement: Movement, board: [[str]], boardDict: dict):
 		file, rank, piece = self.getFileRankPiece(movement)
 		pieceId = None
+		newFace = None
 
 		side = 1
 		if movement.color == 'B':
@@ -302,9 +328,14 @@ class Board:
 				piece = piece.upper()
 			if movement.color == 'B':
 				piece = piece.lower()
+			newFace = piece
 
 		board[rank][file] = piece 
+		if self.getPieceIdInPosition(rank,file):
+			boardDict[self.getPieceIdInPosition(rank,file)]['taken'] = True
 		boardDict[pieceId]['pos'] = fromFileRank(file, rank)
+		if newFace:
+			boardDict[pieceId]['face'] = newFace
 
 
 
@@ -377,6 +408,9 @@ class Board:
 		board[pieceFrom['rank']][pieceFrom['file']] = ' '
 
 		pieceId = self.getPieceIdInPosition(pieceFrom['rank'], pieceFrom['file'])
+
+		if self.getPieceIdInPosition(rank,file):
+			boardDict[self.getPieceIdInPosition(rank,file)]['taken'] = True
 		boardDict[pieceId]['pos'] = fromFileRank(file, rank)
 
 

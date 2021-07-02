@@ -62,9 +62,9 @@ class TestBoardPositions:
 		self.parser.parse(self.lexer.tokenize('1. e4 e5'))
 		assert(self.board.getLastBoardInFEN() == 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR')
 		boardDict = self.board.getLastBoardDict()
-		assert(boardDict['r1'] == {'pos': 'a8'})
-		assert(boardDict['P5'] == {'pos': 'e4'})
-		assert(boardDict['p5'] == {'pos': 'e5'})
+		assert(boardDict['r1'] == {'pos': 'a8', 'taken': False, 'face': 'r'})
+		assert(boardDict['P5'] == {'pos': 'e4', 'taken': False, 'face': 'P'})
+		assert(boardDict['p5'] == {'pos': 'e5', 'taken': False, 'face': 'p'})
 
 	def test_pawn(self):
 		self.parser.parse(self.lexer.tokenize('1. e4 e5 2. d4 d5 3. dxe5'))
