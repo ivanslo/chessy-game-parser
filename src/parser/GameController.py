@@ -18,7 +18,11 @@ class Game:
 
 	def toDict(self):
 		## convert itself into a dictionary/map
-		pass
+		return {
+			'id': self.id,
+			'info': self.info,
+			'steps': self.steps
+		}
 
 	def addStep(self, step):
 		self.steps.append( step )
@@ -90,5 +94,6 @@ def processPGNFile(pgnFileName: str):
 			outputFileName = "%s_%d.json" % (pgnFileName[:-4], i)
 			# print("------------")
 			# print(pg.toJSON())
+			# print(pg.toDict())
 			with open(outputFileName, 'w') as outputFile:
 				outputFile.writelines(pg.toJSON())

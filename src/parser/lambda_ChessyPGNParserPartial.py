@@ -89,7 +89,7 @@ def lambda_handler(event, context):
                 item_db['id'] = str(game.id)
                 for k in game.info.keys():
                     item_db[k] = str(game.info[k])
-                item_db['jsonFile'] = game.toJSON()
+                item_db['jsonFile'] = game.toDict()
                 item_db['addedDate'] = getDatetime()
                 batch.put_item(Item=item_db)
     except Exception as e:
