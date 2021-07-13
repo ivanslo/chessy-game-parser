@@ -136,7 +136,7 @@ class Board:
 	def getLastStep(self) -> dict:
 		step = {
 			'board': self.getLastBoardInFEN() ,
-			'boardDict': self.getLastBoardDict() ,
+			# 'boardDict': self.getLastBoardDict() ,
 			'boardDictDiff': self.boardDictDiff()
 		}
 		if self.isInCheck:

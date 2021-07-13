@@ -29,6 +29,9 @@ class ParsedGame:
     def toJSON(self):
         return "jsonified"
 
+    def toDict(self):
+        return {"dictified":""}
+
 
 lambdaEvent = { 'Records': [ {'body': _msgBody }]}
 
@@ -61,7 +64,7 @@ def mockSuccessDbItem(pg: ParsedGame) -> dict :
     _dbItem = {
             'id': str(pg.id),
             'addedDate': _time,
-            'jsonFile': pg.toJSON()
+            'jsonFile': pg.toDict()
             }
     for k in pg.info:
         _dbItem[k] = pg.info[k]
