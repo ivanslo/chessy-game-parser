@@ -70,7 +70,18 @@ def mockSuccessDbItem(pg: ParsedGame) -> dict :
         _dbItem[k] = pg.info[k]
     return _dbItem
 
-with patch.dict(os.environ, {'LOG_LEVEL': '3'}):
+mock_tableChessGamesFailed = 'games_failed'
+mock_tablePgnFailed = 'pgn_failed'
+mock_tablePgnSucceeded = 'pgn_succeeded'
+mock_tableChessGames = 'chess_games'
+
+
+with patch.dict(os.environ, {'LOG_LEVEL': '3', 
+    'TABLE_CHESS_GAMES_FAILED':mock_tableChessGamesFailed,
+    'TABLE_PGN_FILES_SUCCEEDED':mock_tablePgnSucceeded,
+    'TABLE_PGN_FILES_FAILED': mock_tablePgnFailed,
+    'TABLE_CHESS_GAMES':mock_tableChessGames
+    }):
     import lambda_ChessyPGNParserPartial as L
 
 
@@ -113,7 +124,7 @@ class TestLambdaChessyPGNParserPartial:
             L.lambda_handler(lambdaEvent, mockContext)
     
         item = mockFailedDbItem('reading')
-        mockDynamo.Table.assert_called_once_with('pgn_files_failed')
+        mockDynamo.Table.assert_called_once_with(mock_tablePgnFailed)
         mockDynamo.Table.return_value.put_item.assert_called_once()
         mockDynamo.Table.return_value.put_item.assert_called_once_with(Item=item)
 
@@ -131,7 +142,7 @@ class TestLambdaChessyPGNParserPartial:
 
         mockGameController.processPGNText.assert_called_once()
         item = mockFailedDbItem('parsing')
-        mockDynamo.Table.assert_called_once_with('pgn_files_failed')
+        mockDynamo.Table.assert_called_once_with(mock_tablePgnFailed)
         mockDynamo.Table.return_value.put_item.assert_called_once()
         mockDynamo.Table.return_value.put_item.assert_called_once_with(Item=item)
 
@@ -160,7 +171,7 @@ class TestLambdaChessyPGNParserPartial:
         assert( mockDynamo.Table.call_count == 2 )
 
         mockDynamo.Table.assert_any_call('chess_games')
-        mockDynamo.Table.assert_any_call('pgn_files_failed')
+        mockDynamo.Table.assert_any_call(mock_tablePgnFailed)
 
         failedItem = mockFailedDbItem('writing')
         mockTable.put_item.assert_called_once()
@@ -187,7 +198,7 @@ class TestLambdaChessyPGNParserPartial:
 
         assert( mockDynamo.Table.call_count == 2 )
         mockDynamo.Table.assert_any_call('chess_games')
-        mockDynamo.Table.assert_any_call('pgn_files_succeeded')
+        mockDynamo.Table.assert_any_call(mock_tablePgnSucceeded)
 
         mockTable.put_item.assert_called_once()
         mockTable.put_item.assert_called_once_with(Item=mockAddedDbItem(1))
@@ -214,7 +225,7 @@ class TestLambdaChessyPGNParserPartial:
         mockBatch.put_item.assert_any_call(Item=mockSuccessDbItem(pg2))
 
         mockDynamo.Table.assert_any_call('chess_games')
-        mockDynamo.Table.assert_any_call('pgn_files_succeeded')
+        mockDynamo.Table.assert_any_call(mock_tablePgnSucceeded)
 
         mockTable.put_item.assert_called_once()
         mockTable.put_item.assert_called_once_with(Item=mockAddedDbItem(2))
@@ -237,8 +248,8 @@ class TestLambdaChessyPGNParserPartial:
         L.lambda_handler(lambdaEvent, mockContext)
 
         mockDynamo.Table.assert_any_call('chess_games')
-        mockDynamo.Table.assert_any_call('pgn_files_succeeded')
-        mockDynamo.Table.assert_any_call('chess_games_failed')
+        mockDynamo.Table.assert_any_call(mock_tablePgnSucceeded)
+        mockDynamo.Table.assert_any_call(mock_tableChessGamesFailed)
 
         # good game
         assert( mockBatch.put_item.call_count == 1 )
@@ -268,8 +279,8 @@ class TestLambdaChessyPGNParserPartial:
         L.lambda_handler(lambdaEvent, mockContext)
 
         mockDynamo.Table.assert_any_call('chess_games')
-        mockDynamo.Table.assert_any_call('pgn_files_succeeded')
-        mockDynamo.Table.assert_any_call('chess_games_failed')
+        mockDynamo.Table.assert_any_call(mock_tablePgnSucceeded)
+        mockDynamo.Table.assert_any_call(mock_tableChessGamesFailed)
 
         # good game
         assert( mockBatch.put_item.call_count == 3 )

@@ -20,6 +20,12 @@ logger = logging.getLogger()
 level = os.environ['LOG_LEVEL']
 logger.setLevel(int(level))
 
+table_chess_games_failed = os.environ['TABLE_CHESS_GAMES_FAILED']
+table_pgn_files_succeeded =os.environ['TABLE_PGN_FILES_SUCCEEDED']
+table_pgn_files_failed= os.environ['TABLE_PGN_FILES_FAILED']
+table_chess_games = os.environ['TABLE_CHESS_GAMES']
+
+
 
 toProcess_FileKey = ""
 toProcess_Bucket = ""
@@ -75,7 +81,7 @@ def lambda_handler(event, context):
     
     duplicatedKeysErrors = []
     try:
-        table = dynamodb.Table('chess_games')
+        table = dynamodb.Table(table_chess_games)
         with table.batch_writer() as batch:
             batchedIds= set([])
             for game in parsedGames:
@@ -114,7 +120,7 @@ def getProcessingId() -> str:
 
 def save_failed_game(reason: str):
     signal.alarm(0)
-    table = dynamodb.Table('chess_games_failed')
+    table = dynamodb.Table(table_chess_games_failed)
     when = getDatetime()
     table.put_item(Item={
         'id': getProcessingId(),
@@ -128,7 +134,7 @@ def save_failed_game(reason: str):
 
 def save_failed_gamefile(reason: str):
     signal.alarm(0)
-    table = dynamodb.Table('pgn_files_failed')
+    table = dynamodb.Table(table_pgn_files_failed)
     when = getDatetime()
     table.put_item(Item={
         'id': getProcessingId(),
@@ -142,7 +148,7 @@ def save_failed_gamefile(reason: str):
 
 def save_succeeded_game(gamesQuantity: int):
     signal.alarm(0)
-    table = dynamodb.Table('pgn_files_succeeded')
+    table = dynamodb.Table(table_pgn_files_succeeded)
     when = getDatetime()
     table.put_item(Item={
         'id': getProcessingId(),
