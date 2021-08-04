@@ -10,7 +10,10 @@ from pytest_mock import mocker
 from unittest.mock import patch
 import pytest
 
-with patch.dict(os.environ, {'LOG_LEVEL': '3'}):
+
+mock_tablePgnFailed = 'table-failed'
+
+with patch.dict(os.environ, {'LOG_LEVEL': '3', 'TABLE_PGN_FILES_FAILED': mock_tablePgnFailed}):
     import lambda_ChessyPGNFailedProcess as L
 
 
@@ -36,7 +39,7 @@ class TestLambdaChessyPGNFailedProcess:
 
         L.lambda_handler(lambdaEvent, None)
 
-        dynamoMock.Table.assert_called_once_with('pgn_files_failed')
+        dynamoMock.Table.assert_called_once_with(mock_tablePgnFailed)
         tableMock.put_item.assert_called_once()
 
     def test_callsDynamoDBCorrectly(self, mocker):
@@ -50,7 +53,7 @@ class TestLambdaChessyPGNFailedProcess:
 
         L.lambda_handler(lambdaEvent, None)
 
-        dynamoMock.Table.assert_called_once_with('pgn_files_failed')
+        dynamoMock.Table.assert_called_once_with(mock_tablePgnFailed)
         tableMock.put_item.assert_called_once()
 
         tableMock.put_item.assert_called_with(Item={
@@ -74,7 +77,7 @@ class TestLambdaChessyPGNFailedProcess:
 
         L.lambda_handler(lambdaEvent_bad, None)
 
-        dynamoMock.Table.assert_called_once_with('pgn_files_failed')
+        dynamoMock.Table.assert_called_once_with(mock_tablePgnFailed)
 
         ## FAIL TO PARSE MESSAGE VALUES
         _bucket = '_bucket_'

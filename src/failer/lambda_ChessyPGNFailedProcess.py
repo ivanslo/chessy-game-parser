@@ -15,6 +15,7 @@ logger = logging.getLogger()
 level = os.environ['LOG_LEVEL']
 logger.setLevel(int(level))
 
+table_pgn_files_failed = os.environ['TABLE_PGN_FILES_FAILED']
 
 def lambda_handler(event, context):
     # Get the object from the event
@@ -32,7 +33,7 @@ def lambda_handler(event, context):
         (b,fk,f,t) = match.groups()
         logger.debug('Handling bucket/key/from/to: {}/{}/{}/{}'.format(b,fk,f,t))
 
-    table = dynamodb.Table('pgn_files_failed')
+    table = dynamodb.Table(table_pgn_files_failed)
     table.put_item(Item={
         'id': '{}_{}_{}_{}_DLQ'.format(b, fk, f, t),
         'bucket': b,
